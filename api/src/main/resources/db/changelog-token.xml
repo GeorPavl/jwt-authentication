@@ -9,7 +9,7 @@
       <column name="id" type="UUID">
         <constraints primaryKey="true" nullable="false" unique="true"/>
       </column>
-      <column name="token" type="VARCHAR(255)">
+      <column name="value" type="VARCHAR(255)">
         <constraints nullable="false" unique="true"/>
       </column>
       <column name="is_revoked" type="BOOLEAN">
