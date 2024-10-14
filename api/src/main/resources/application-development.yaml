@@ -6,3 +6,6 @@ spring:
     username: Admin1
     url: jdbc:postgresql://localhost:5432/jwt-auth
     password: JwtAuth123!@#
+  liquibase:
+    change-log: classpath:db/changelog-master.xml
+    enabled: true

@@ -1,0 +1,87 @@
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+  <changeSet id="create-users-table" author="georpavl">
+    <createTable tableName="users">
+      <column name="id" type="UUID">
+        <constraints primaryKey="true" nullable="false" unique="true"/>
+      </column>
+      <column name="email" type="VARCHAR(50)">
+        <constraints nullable="false" unique="true"/>
+      </column>
+      <column name="first_name" type="VARCHAR(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="last_name" type="VARCHAR(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="phone_number" type="VARCHAR(255)"/>
+      <column name="password" type="VARCHAR(120)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="role" type="VARCHAR(50)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="enabled" type="boolean">
+        <constraints nullable="false"/>
+      </column>
+      <column name="verified" type="boolean">
+        <constraints nullable="false"/>
+      </column>
+      <column name="verified_at" type="TIMESTAMP"/>
+      <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+        <constraints nullable="false"/>
+      </column>
+      <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+        <constraints nullable="false"/>
+      </column>
+      <column name="token" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="code" type="INTEGER">
+        <constraints nullable="true"/>
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet id="insert-data-in-users-table" author="georpavl">
+    <insert tableName="users">
+      <column name="id" value="1e02b0a0-7c92-11e8-adc0-fa7ae01bbebc"/>
+      <column name="email" value="user1@example.com"/>
+      <column name="first_name" value="John"/>
+      <column name="last_name" value="Doe"/>
+      <column name="phone_number" value="1234567890"/>
+      <column name="password" value="$2a$12$le46pvRDKMfY//.CaCN6j.LmJURvH3ve9iXVoL9jGbqbL3oG1Aywq"/>
+      <column name="role" value="USER"/>
+      <column name="enabled" value="true"/>
+      <column name="verified" value="true"/>
+      <column name="verified_at" valueDate="2022-01-01T00:00:00"/>
+      <column name="created_at" valueDate="2022-01-01T00:00:00"/>
+      <column name="updated_at" valueDate="2022-01-01T00:00:00"/>
+      <column name="token" value="token1"/>
+      <column name="code" valueNumeric="1234"/>
+    </insert>
+
+    <insert tableName="users">
+      <column name="id" value="1e02b0a0-7c92-11e8-adc0-fa7ae01bbebd"/>
+      <column name="email" value="user2@example.com"/>
+      <column name="first_name" value="Jane"/>
+      <column name="last_name" value="Smith"/>
+      <column name="phone_number" value="0987654321"/>
+      <column name="password" value="$2a$12$groyQFQtV0yYAWaEPOvQJu3fPIBkIOKBYTkI7Q49vzE.yLS4ouRH2"/>
+      <column name="role" value="ADMIN"/>
+      <column name="enabled" value="true"/>
+      <column name="verified" value="true"/>
+      <column name="verified_at" valueDate="2022-02-01T00:00:00"/>
+      <column name="created_at" valueDate="2022-02-01T00:00:00"/>
+      <column name="updated_at" valueDate="2022-02-01T00:00:00"/>
+      <column name="token" value="token2"/>
+      <column name="code" valueNumeric="5678"/>
+    </insert>
+  </changeSet>
+
+</databaseChangeLog>
+
