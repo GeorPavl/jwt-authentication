@@ -1,0 +1,8 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: none
+  datasource:
+    username: Admin1
+    url: jdbc:postgresql://localhost:5432/jwt-auth
+    password: JwtAuth123!@#

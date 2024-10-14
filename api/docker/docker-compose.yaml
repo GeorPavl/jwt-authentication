@@ -1,0 +1,24 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: 'postgres:latest'
+    restart: always
+    container_name: jwt-auth-db
+    environment:
+      - POSTGRES_DB=jwt-auth
+      - POSTGRES_PASSWORD=JwtAuth123!@#
+      - POSTGRES_USER=Admin1
+    ports:
+      - 5432:5432
+
+  postgres-testing:
+    image: 'postgres:latest'
+    restart: always
+    container_name: jwt-auth-test-db
+    environment:
+      - POSTGRES_DB=jwt-auth-testing
+      - POSTGRES_PASSWORD=JwtAuthTest123!@#
+      - POSTGRES_USER=AdminTest1
+    ports:
+      - 5433:5432

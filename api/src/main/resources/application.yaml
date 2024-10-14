@@ -1,0 +1,29 @@
+spring:
+  main:
+    banner-mode: "off"
+  profiles.active: development
+  jpa:
+    show-sql: 'false'
+    open-in-view: false
+  mvc:
+    log-request-details: 'false'
+application:
+  name: jwt-authentication-demo
+  security:
+    jwt:
+      secret-key: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+      expiration: 86400000 # one day
+      refresh-token:
+        expiration: 604800000 # 7 days
+logging:
+  level:
+    org:
+      hibernate: INFO
+      springframework:
+        web: DEBUG
+        security: DEBUG
+      nodeValue: DEBUG
+    guru:
+      springframework:
+        controllers: DEBUG
+
