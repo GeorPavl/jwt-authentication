@@ -20,6 +20,11 @@ public record UserResponse(
   }
 
   public static UserResponse of(User user) {
-    return of(user.getId(), user.getEmail(), user.getFirstName(), user.getLastName(), user.getPhoneNumber());
+    return of(
+        user.getId(),
+        user.getEmail(),
+        user.getFirstName(),
+        user.getLastName(),
+        user.getPhoneNumber());
   }
 }

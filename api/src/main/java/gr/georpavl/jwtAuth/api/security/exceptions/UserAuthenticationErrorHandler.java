@@ -26,11 +26,11 @@ public class UserAuthenticationErrorHandler extends BasicAuthenticationEntryPoin
       throws IOException {
     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
     response.setContentType("application/json");
-
-    String errorMessage =
+    log.error("Authentication exception", ex);
+    var errorMessage =
         "The access token provided has expired, revoked, erroneous, or is otherwise invalid.";
 
-    String jsonErrorMessage =
+    var jsonErrorMessage =
         this.objectMapper.writeValueAsString(
             Map.of("errors", Map.of("UNAUTHORIZED:", List.of(errorMessage))));
 

@@ -5,6 +5,7 @@ import gr.georpavl.jwtAuth.api.domain.authentication.dtos.AuthenticationResponse
 import gr.georpavl.jwtAuth.api.domain.authentication.dtos.RegistrationRequest;
 import gr.georpavl.jwtAuth.api.domain.authentication.services.AuthenticationService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +24,7 @@ public class AuthenticationController {
 
   @PostMapping("/authenticate")
   public ResponseEntity<AuthenticationResponse> authenticate(
-      @RequestBody AuthenticationRequest request) {
+      @RequestBody @Valid AuthenticationRequest request) {
     var result = authenticationService.authenticate(request);
     log.info("User is authenticated successfully.");
     return ResponseEntity.ok(result);
@@ -31,7 +32,7 @@ public class AuthenticationController {
 
   @PostMapping("/register")
   public ResponseEntity<AuthenticationResponse> register(
-      @RequestBody RegistrationRequest request) {
+      @RequestBody @Valid RegistrationRequest request) {
     var result = authenticationService.register(request);
     log.info("User is registered successfully.");
     return ResponseEntity.accepted().body(result);

@@ -29,8 +29,6 @@ public class JwtService {
   private long refreshExpiration;
 
   public String extractUsername(String token) {
-    log.warn("extract username = " + extractClaim(token, Claims::getSubject));
-    log.warn(extractAllClaims(token).toString());
     return extractClaim(token, Claims::getSubject);
   }
 
@@ -54,6 +52,7 @@ public class JwtService {
 
   private String buildToken(
       Map<String, Object> extraClaims, UserDetails userDetails, long expiration) {
+
     return Jwts.builder()
         .setClaims(extraClaims)
         .setSubject(userDetails.getUsername())

@@ -20,7 +20,7 @@ public interface TokenJpaRepository extends JpaRepository<Token, UUID> {
         """)
   List<Token> findAllValidTokenByUser(UUID userId);
 
-  Optional<Token> findByUserToken(String token);
+  Optional<Token> findByValue(String value);
 
   @Transactional
   @Modifying

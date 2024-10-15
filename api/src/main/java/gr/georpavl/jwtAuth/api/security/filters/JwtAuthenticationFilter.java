@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,6 +20,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
   private final JwtService jwtService;
@@ -76,10 +78,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   private boolean isTokenValid(String jwt, UserDetails userDetails) {
     boolean tokenExistsAndValid =
         tokenJpaRepository
-            .findByUserToken(jwt)
+            .findByValue(jwt)
             .map(t -> !t.isExpired() && !t.isRevoked())
             .orElse(false);
-
     return jwtService.isTokenValid(jwt, userDetails) && tokenExistsAndValid;
   }
 

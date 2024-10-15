@@ -3,18 +3,13 @@ package gr.georpavl.jwtAuth.api.domain.authentication.dtos;
 import gr.georpavl.jwtAuth.api.domain.users.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import javax.validation.constraints.Pattern;
 import lombok.Builder;
 
 @Builder
 public record RegistrationRequest(
-    @NotEmpty(message = "'Username' is required.")
-        @Size(
-            min = 3,
-            max = 20,
-            message = "'Username' must be between {min} and {max} characters long.")
-        String username,
     @NotEmpty(message = "'Email' is required.")
         @Size(
             min = 4,
@@ -37,4 +32,4 @@ public record RegistrationRequest(
                 "Your password must have minimum eight characters, at least one uppercase letter, one "
                     + "lowercase letter, one number and one special character.")
         String password,
-    @NotEmpty(message = "'Role' is required.") Role role) {}
+    @NotNull(message = "'Role' is required.") Role role) {}

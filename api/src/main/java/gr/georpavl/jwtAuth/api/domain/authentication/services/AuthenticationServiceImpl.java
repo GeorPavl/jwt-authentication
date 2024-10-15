@@ -6,10 +6,10 @@ import gr.georpavl.jwtAuth.api.domain.authentication.dtos.RefreshTokenRequest;
 import gr.georpavl.jwtAuth.api.domain.authentication.dtos.RegistrationRequest;
 import gr.georpavl.jwtAuth.api.domain.tokens.services.TokenService;
 import gr.georpavl.jwtAuth.api.domain.users.User;
-import gr.georpavl.jwtAuth.api.domain.users.services.UserService;
 import gr.georpavl.jwtAuth.api.domain.users.dtos.UserResponse;
 import gr.georpavl.jwtAuth.api.domain.users.mappers.UserMapper;
 import gr.georpavl.jwtAuth.api.domain.users.repositories.UserJpaRepository;
+import gr.georpavl.jwtAuth.api.domain.users.services.UserService;
 import gr.georpavl.jwtAuth.api.security.exceptions.CommonSecurityException;
 import gr.georpavl.jwtAuth.api.security.exceptions.UserAlreadyRegisteredException;
 import gr.georpavl.jwtAuth.api.security.services.JwtService;
@@ -20,8 +20,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -32,10 +32,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
   private final UserJpaRepository userJpaRepository;
   private final JwtService jwtService;
-  private final AuthenticationManager authenticationManager;
   private final TokenService tokenService;
   private final UserMapper userMapper;
   private final UserService userService;
+  private final DaoAuthenticationProvider authenticationProvider;
 
   @Override
   public AuthenticationResponse authenticate(AuthenticationRequest request) {
@@ -63,8 +63,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         throw new UserAlreadyRegisteredException(request.email());
       }
       throw translatedException;
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       log.error("Error during authentication process for user {}", request.email(), e);
       throw e;
     }
@@ -104,7 +103,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
   private void authenticateCredentials(String email, String password) {
     // TODO: 15/10/2024 Check the response of the exception
-    authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
+    authenticationProvider.authenticate(new UsernamePasswordAuthenticationToken(email, password));
   }
 
   private User findUserOrElseThrow(String email) {
