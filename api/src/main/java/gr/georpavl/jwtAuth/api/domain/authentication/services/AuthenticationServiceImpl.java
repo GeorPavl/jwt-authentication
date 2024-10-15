@@ -6,15 +6,20 @@ import gr.georpavl.jwtAuth.api.domain.authentication.dtos.RefreshTokenRequest;
 import gr.georpavl.jwtAuth.api.domain.authentication.dtos.RegistrationRequest;
 import gr.georpavl.jwtAuth.api.domain.tokens.services.TokenService;
 import gr.georpavl.jwtAuth.api.domain.users.User;
+import gr.georpavl.jwtAuth.api.domain.users.services.UserService;
 import gr.georpavl.jwtAuth.api.domain.users.dtos.UserResponse;
 import gr.georpavl.jwtAuth.api.domain.users.mappers.UserMapper;
 import gr.georpavl.jwtAuth.api.domain.users.repositories.UserJpaRepository;
 import gr.georpavl.jwtAuth.api.security.exceptions.CommonSecurityException;
+import gr.georpavl.jwtAuth.api.security.exceptions.UserAlreadyRegisteredException;
 import gr.georpavl.jwtAuth.api.security.services.JwtService;
 import gr.georpavl.jwtAuth.api.security.userDetails.UserDetailsImpl;
+import gr.georpavl.jwtAuth.api.utils.exceptions.ExceptionUtilsFactory;
+import gr.georpavl.jwtAuth.api.utils.exceptions.implementations.ResourceAlreadyPresentException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -30,6 +35,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   private final AuthenticationManager authenticationManager;
   private final TokenService tokenService;
   private final UserMapper userMapper;
+  private final UserService userService;
 
   @Override
   public AuthenticationResponse authenticate(AuthenticationRequest request) {
@@ -44,13 +50,21 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
   }
 
+  // FIXME: 15/10/2024 Validations, exception handling
   @Override
   public AuthenticationResponse register(RegistrationRequest request) {
     var user = userMapper.toEntity(request);
-    // TODO: 14/10/2024 Add checks and restrictions for registered user
     try {
-      return generateTokensAndReturnAuthenticationResponse(user);
-    } catch (Exception e) {
+      var registeredUser = userService.createUser(user);
+      return generateTokensAndReturnAuthenticationResponse(registeredUser);
+    } catch (DataIntegrityViolationException e) {
+      var translatedException = ExceptionUtilsFactory.of(e);
+      if (translatedException instanceof ResourceAlreadyPresentException) {
+        throw new UserAlreadyRegisteredException(request.email());
+      }
+      throw translatedException;
+    }
+    catch (Exception e) {
       log.error("Error during authentication process for user {}", request.email(), e);
       throw e;
     }
@@ -89,6 +103,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   }
 
   private void authenticateCredentials(String email, String password) {
+    // TODO: 15/10/2024 Check the response of the exception
     authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
   }
 
