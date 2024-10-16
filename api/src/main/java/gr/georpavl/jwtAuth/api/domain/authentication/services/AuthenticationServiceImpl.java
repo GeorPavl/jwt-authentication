@@ -2,7 +2,6 @@ package gr.georpavl.jwtAuth.api.domain.authentication.services;
 
 import gr.georpavl.jwtAuth.api.domain.authentication.dtos.AuthenticationRequest;
 import gr.georpavl.jwtAuth.api.domain.authentication.dtos.AuthenticationResponse;
-import gr.georpavl.jwtAuth.api.domain.authentication.dtos.RefreshTokenRequest;
 import gr.georpavl.jwtAuth.api.domain.authentication.dtos.RegistrationRequest;
 import gr.georpavl.jwtAuth.api.domain.tokens.services.TokenService;
 import gr.georpavl.jwtAuth.api.domain.users.User;
@@ -10,15 +9,13 @@ import gr.georpavl.jwtAuth.api.domain.users.dtos.UserResponse;
 import gr.georpavl.jwtAuth.api.domain.users.mappers.UserMapper;
 import gr.georpavl.jwtAuth.api.domain.users.repositories.UserJpaRepository;
 import gr.georpavl.jwtAuth.api.domain.users.services.UserService;
-import gr.georpavl.jwtAuth.api.security.exceptions.implementations.CommonSecurityException;
 import gr.georpavl.jwtAuth.api.security.exceptions.implementations.UserAlreadyRegisteredException;
 import gr.georpavl.jwtAuth.api.security.services.JwtService;
-import gr.georpavl.jwtAuth.api.security.userDetails.UserDetailsImpl;
 import gr.georpavl.jwtAuth.api.utils.exceptions.ExceptionUtilsFactory;
 import gr.georpavl.jwtAuth.api.utils.exceptions.implementations.PasswordMissMatchException;
 import gr.georpavl.jwtAuth.api.utils.exceptions.implementations.ResourceAlreadyPresentException;
 import gr.georpavl.jwtAuth.api.utils.mailService.MailService;
-import jakarta.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -27,6 +24,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.web.authentication.session.SessionAuthenticationException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -41,6 +39,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   private final UserService userService;
   private final AuthenticationManagerBuilder authenticationManagerBuilder;
   private final MailService mailService;
+  private final TokenManagerService tokenManagerService;
 
   @Override
   public AuthenticationResponse authenticate(AuthenticationRequest request) {
@@ -57,54 +56,17 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
   @Override
   public AuthenticationResponse register(RegistrationRequest request) {
-    try {
-      checkIfConfirmationPasswordMatches(request);
-      var user = userMapper.toEntity(request);
-      var registeredUser = userService.createUser(user);
-      sendVerificationEmail(registeredUser);
-      return generateTokensAndReturnAuthenticationResponse(registeredUser);
-    } catch (DataIntegrityViolationException e) {
-      var translatedException = ExceptionUtilsFactory.of(e);
-      if (translatedException instanceof ResourceAlreadyPresentException) {
-        throw new UserAlreadyRegisteredException(request.email());
-      }
-      throw translatedException;
-    } catch (Exception e) {
-      log.error("Error during authentication process for user {}", request.email(), e);
-      throw e;
-    }
+    checkIfConfirmationPasswordMatches(request);
+    var user = createUser(request);
+    sendVerificationEmail(user);
+    return generateTokensAndReturnAuthenticationResponse(user);
   }
 
   @Override
-  public AuthenticationResponse refreshToken(HttpServletRequest servletRequest) {
-    var request = userMapper.toRefreshTokenRequest(servletRequest);
-    var user = findUserOrElseThrow(request.email());
-    validateTokenOrElseThrow(request, user);
-    try {
-      tokenService.revokeUsersTokens(user.getId());
-      return generateTokensAndReturnAuthenticationResponse(user);
-    } catch (Exception e) {
-      log.error("Error during token refreshing process for user", e);
-      throw e;
-    }
-  }
-
-  private AuthenticationResponse generateTokensAndReturnAuthenticationResponse(User user) {
-    var accessToken = createAndSaveAccessToken(user);
-    var refreshToken = createAndSaveRefreshToken(user);
-    return AuthenticationResponse.of(UserResponse.of(user), accessToken, refreshToken);
-  }
-
-  private String createAndSaveAccessToken(User user) {
-    var accessToken = jwtService.generateToken(new UserDetailsImpl(user));
-    tokenService.createToken(user, accessToken);
-    return accessToken;
-  }
-
-  private String createAndSaveRefreshToken(User user) {
-    var refreshToken = jwtService.generateRefreshToken(new UserDetailsImpl(user));
-    tokenService.createToken(user, refreshToken);
-    return refreshToken;
+  public void verify(String token, Integer code) {
+    var user = getUserIfSessionNotExpired(code);
+    isVerificationTokenValid(token, user);
+    enableAndVerifyUserAccount(user);
   }
 
   /**
@@ -133,10 +95,27 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             () -> new UsernameNotFoundException(String.format("User %s not found", email)));
   }
 
-  private void validateTokenOrElseThrow(RefreshTokenRequest request, User user) {
-    if (!jwtService.isTokenValid(request.refreshToken(), new UserDetailsImpl(user))) {
-      throw CommonSecurityException.headerError();
+  private AuthenticationResponse generateTokensAndReturnAuthenticationResponse(User user) {
+    var accessToken = tokenManagerService.createAndSaveToken(user, "ACCESS");
+    var refreshToken = tokenManagerService.createAndSaveToken(user, "REFRESH");
+    return AuthenticationResponse.of(UserResponse.of(user), accessToken, refreshToken);
+  }
+
+  private User createUser(RegistrationRequest request) {
+    try {
+      return userService.createUser(userMapper.toEntity(request));
+    } catch (DataIntegrityViolationException e) {
+      handleRegistrationException(request.email(), e);
+      return null;
     }
+  }
+
+  private void handleRegistrationException(String email, DataIntegrityViolationException e) {
+    var translatedException = ExceptionUtilsFactory.of(e);
+    if (translatedException instanceof ResourceAlreadyPresentException) {
+      throw new UserAlreadyRegisteredException(email);
+    }
+    throw translatedException;
   }
 
   private void sendVerificationEmail(User user) {
@@ -146,6 +125,31 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   private void checkIfConfirmationPasswordMatches(RegistrationRequest request) {
     if (!request.password().equals(request.confirmationPassword())) {
       throw new PasswordMissMatchException();
+    }
+  }
+
+  private User getUserIfSessionNotExpired(Integer code) {
+    return userJpaRepository
+        .findByCode(code)
+        .orElseThrow(() -> new SessionAuthenticationException("SESSION_EXPIRED"));
+  }
+
+  private static void isVerificationTokenValid(String token, User user) {
+    if (!user.getToken().equals(token)) {
+      throw new SessionAuthenticationException("INVALID_TOKEN");
+    }
+  }
+
+  private void enableAndVerifyUserAccount(User user) {
+    try {
+      user.setEnabled(true);
+      user.setVerified(true);
+      user.setVerifiedAt(LocalDateTime.now());
+      user.setCode(null);
+      user.setToken(null);
+      userJpaRepository.save(user);
+    } catch (Exception e) {
+      throw new SessionAuthenticationException("Error saving user verification details.");
     }
   }
 }

@@ -4,6 +4,7 @@ import gr.georpavl.jwtAuth.api.domain.authentication.dtos.AuthenticationRequest;
 import gr.georpavl.jwtAuth.api.domain.authentication.dtos.AuthenticationResponse;
 import gr.georpavl.jwtAuth.api.domain.authentication.dtos.RegistrationRequest;
 import gr.georpavl.jwtAuth.api.domain.authentication.services.AuthenticationService;
+import gr.georpavl.jwtAuth.api.domain.authentication.services.TokenManagerService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthenticationController {
 
   private final AuthenticationService authenticationService;
+  private final TokenManagerService tokenManagerService;
 
   @PostMapping("/authenticate")
   public ResponseEntity<AuthenticationResponse> authenticate(
@@ -42,8 +44,15 @@ public class AuthenticationController {
 
   @PostMapping("/refresh-token")
   public ResponseEntity<AuthenticationResponse> refreshToken(HttpServletRequest request) {
-    var result = authenticationService.refreshToken(request);
+    var result = tokenManagerService.refreshToken(request);
     log.info("Token is refreshed successfully.");
     return ResponseEntity.ok(result);
+  }
+
+  @GetMapping("/verify")
+  public ResponseEntity<Void> verifyUser(
+      @RequestParam("token") String token, @RequestParam("code") Integer code) {
+    authenticationService.verify(token, code);
+    return ResponseEntity.ok().build();
   }
 }
