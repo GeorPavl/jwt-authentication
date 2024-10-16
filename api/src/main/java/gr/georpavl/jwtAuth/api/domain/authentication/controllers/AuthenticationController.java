@@ -10,7 +10,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,10 +27,10 @@ public class AuthenticationController {
   private final AuthenticationService authenticationService;
   private final TokenManagerService tokenManagerService;
 
-  @PostMapping("/authenticate")
-  public ResponseEntity<AuthenticationResponse> authenticate(
+  @PostMapping("/login")
+  public ResponseEntity<AuthenticationResponse> login(
       @RequestBody @Valid AuthenticationRequest request) {
-    var result = authenticationService.authenticate(request);
+    var result = authenticationService.login(request);
     log.info("User is authenticated successfully.");
     return ResponseEntity.ok(result);
   }
@@ -49,10 +50,18 @@ public class AuthenticationController {
     return ResponseEntity.ok(result);
   }
 
-  @GetMapping("/verify")
+  @PatchMapping("/verify")
   public ResponseEntity<Void> verifyUser(
       @RequestParam("token") String token, @RequestParam("code") Integer code) {
     authenticationService.verify(token, code);
-    return ResponseEntity.ok().build();
+    log.info("User is verified successfully.");
+    return ResponseEntity.accepted().build();
+  }
+
+  @PatchMapping("/resend-verification-email/{userEmail}")
+  public ResponseEntity<Void> resendVerificationEmail(@PathVariable("userEmail") String userEmail) {
+    authenticationService.resendVerificationEmail(userEmail);
+    log.info("Verification mail was sent successfully.");
+    return ResponseEntity.accepted().build();
   }
 }

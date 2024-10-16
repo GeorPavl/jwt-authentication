@@ -44,6 +44,9 @@
       <column name="code" type="INTEGER">
         <constraints nullable="true"/>
       </column>
+      <column name="token_expiration" type="TIMESTAMP">
+        <constraints nullable="true"/>
+      </column>
     </createTable>
   </changeSet>
 
@@ -61,8 +64,9 @@
       <column name="verified_at" valueDate="2022-01-01T00:00:00"/>
       <column name="created_at" valueDate="2022-01-01T00:00:00"/>
       <column name="updated_at" valueDate="2022-01-01T00:00:00"/>
-      <column name="token" value="token1"/>
+      <column name="token" value="1e02b0a0-7c92-11e8-adc0-fa7ae01bbebc"/>
       <column name="code" valueNumeric="1234"/>
+      <column name="token_expiration" valueDate="2022-01-01T00:00:00"/>
     </insert>
 
     <insert tableName="users">
@@ -78,8 +82,9 @@
       <column name="verified_at" valueDate="2022-02-01T00:00:00"/>
       <column name="created_at" valueDate="2022-02-01T00:00:00"/>
       <column name="updated_at" valueDate="2022-02-01T00:00:00"/>
-      <column name="token" value="token2"/>
+      <column name="token" value="1e02b0a0-7c92-11e8-adc0-fa7ae01bbebd"/>
       <column name="code" valueNumeric="5678"/>
+      <column name="token_expiration" valueDate="2022-01-01T00:00:00"/>
     </insert>
   </changeSet>
 

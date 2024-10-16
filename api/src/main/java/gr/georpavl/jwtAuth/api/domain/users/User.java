@@ -92,6 +92,9 @@ public class User {
   @Column(name = "code")
   private Integer code = RandomCodeGenerator.generateRandomCode();
 
+  @Column(name = "token_expiration", columnDefinition = "TIMESTAMP")
+  private LocalDateTime tokenExpiration;
+
   public static User of(
       String email, String firstName, String lastName, String phoneNumber, String password) {
     return User.builder()
@@ -106,33 +109,7 @@ public class User {
         .verified(false)
         .code(RandomCodeGenerator.generateRandomCode())
         .token(TokenGenerator.generateToken())
-        .build();
-  }
-
-  public static User of(
-      UUID id,
-      String email,
-      String firstName,
-      String lastName,
-      String phoneNumber,
-      String password,
-      Role role,
-      boolean enabled,
-      boolean verified,
-      Integer code,
-      String token) {
-    return User.builder()
-        .id(id)
-        .email(email)
-        .firstName(firstName)
-        .lastName(lastName)
-        .phoneNumber(phoneNumber)
-        .password(password)
-        .role(role)
-        .enabled(enabled)
-        .verified(verified)
-        .code(code)
-        .token(token)
+        .tokenExpiration(LocalDateTime.now().plusHours(1))
         .build();
   }
 

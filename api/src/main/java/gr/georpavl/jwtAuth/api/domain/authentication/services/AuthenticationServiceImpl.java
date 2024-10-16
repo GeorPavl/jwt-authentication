@@ -10,10 +10,10 @@ import gr.georpavl.jwtAuth.api.domain.users.mappers.UserMapper;
 import gr.georpavl.jwtAuth.api.domain.users.repositories.UserJpaRepository;
 import gr.georpavl.jwtAuth.api.domain.users.services.UserService;
 import gr.georpavl.jwtAuth.api.security.exceptions.implementations.UserAlreadyRegisteredException;
-import gr.georpavl.jwtAuth.api.security.services.JwtService;
 import gr.georpavl.jwtAuth.api.utils.exceptions.ExceptionUtilsFactory;
 import gr.georpavl.jwtAuth.api.utils.exceptions.implementations.PasswordMissMatchException;
 import gr.georpavl.jwtAuth.api.utils.exceptions.implementations.ResourceAlreadyPresentException;
+import gr.georpavl.jwtAuth.api.utils.generators.TokenGenerator;
 import gr.georpavl.jwtAuth.api.utils.mailService.MailService;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +33,6 @@ import org.springframework.stereotype.Service;
 public class AuthenticationServiceImpl implements AuthenticationService {
 
   private final UserJpaRepository userJpaRepository;
-  private final JwtService jwtService;
   private final TokenService tokenService;
   private final UserMapper userMapper;
   private final UserService userService;
@@ -42,7 +41,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   private final TokenManagerService tokenManagerService;
 
   @Override
-  public AuthenticationResponse authenticate(AuthenticationRequest request) {
+  public AuthenticationResponse login(AuthenticationRequest request) {
     authenticateCredentials(request.email(), request.password());
     var user = findUserOrElseThrow(request.email());
     try {
@@ -67,6 +66,18 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     var user = getUserIfSessionNotExpired(code);
     isVerificationTokenValid(token, user);
     enableAndVerifyUserAccount(user);
+  }
+
+  @Override
+  public void resendVerificationEmail(String userEmail) {
+    var user = findUserOrElseThrow(userEmail);
+    if (user.isEnabled()) {
+      throw new ResourceAlreadyPresentException("User is already verified");
+    }
+    user.setToken(TokenGenerator.generateToken());
+    user.setTokenExpiration(LocalDateTime.now().plusHours(24));
+    userJpaRepository.save(user);
+    sendVerificationEmail(user);
   }
 
   /**
@@ -134,9 +145,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         .orElseThrow(() -> new SessionAuthenticationException("SESSION_EXPIRED"));
   }
 
-  private static void isVerificationTokenValid(String token, User user) {
+  private void isVerificationTokenValid(String token, User user) {
     if (!user.getToken().equals(token)) {
-      throw new SessionAuthenticationException("INVALID_TOKEN");
+      throw new SessionAuthenticationException("Invalid token");
+    }
+    if (user.getTokenExpiration().isBefore(LocalDateTime.now())) {
+      throw new SessionAuthenticationException("Token was expired");
     }
   }
 
@@ -147,6 +161,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
       user.setVerifiedAt(LocalDateTime.now());
       user.setCode(null);
       user.setToken(null);
+      user.setTokenExpiration(null);
       userJpaRepository.save(user);
     } catch (Exception e) {
       throw new SessionAuthenticationException("Error saving user verification details.");

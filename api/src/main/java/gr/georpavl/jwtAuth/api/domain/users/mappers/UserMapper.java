@@ -7,9 +7,6 @@ import gr.georpavl.jwtAuth.api.domain.users.dtos.UpdateUserRequest;
 import gr.georpavl.jwtAuth.api.domain.users.dtos.UserResponse;
 import gr.georpavl.jwtAuth.api.security.exceptions.implementations.CommonSecurityException;
 import gr.georpavl.jwtAuth.api.security.services.JwtService;
-import gr.georpavl.jwtAuth.api.utils.generators.RandomCodeGenerator;
-import gr.georpavl.jwtAuth.api.utils.generators.TokenGenerator;
-import gr.georpavl.jwtAuth.api.utils.generators.UUIDGenerator;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,17 +25,11 @@ public class UserMapper {
 
   public User toEntity(RegistrationRequest request) {
     return User.of(
-        UUIDGenerator.generateUUID(),
         request.email(),
         request.firstName(),
         request.lastName(),
         request.phoneNumber(),
-        passwordEncoder.encode(request.password()),
-        request.role(),
-        false,
-        false,
-        RandomCodeGenerator.generateRandomCode(),
-        TokenGenerator.generateToken());
+        passwordEncoder.encode(request.password()));
   }
 
   public User toEntity(User existingUser, UpdateUserRequest request) {
