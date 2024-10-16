@@ -15,6 +15,7 @@ import gr.georpavl.jwtAuth.api.security.exceptions.implementations.UserAlreadyRe
 import gr.georpavl.jwtAuth.api.security.services.JwtService;
 import gr.georpavl.jwtAuth.api.security.userDetails.UserDetailsImpl;
 import gr.georpavl.jwtAuth.api.utils.exceptions.ExceptionUtilsFactory;
+import gr.georpavl.jwtAuth.api.utils.exceptions.implementations.PasswordMissMatchException;
 import gr.georpavl.jwtAuth.api.utils.exceptions.implementations.ResourceAlreadyPresentException;
 import gr.georpavl.jwtAuth.api.utils.mailService.MailService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -54,10 +55,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
   }
 
-  // FIXME: 15/10/2024 Validations, exception handling, confirm password
   @Override
   public AuthenticationResponse register(RegistrationRequest request) {
     try {
+      checkIfConfirmationPasswordMatches(request);
       var user = userMapper.toEntity(request);
       var registeredUser = userService.createUser(user);
       sendVerificationEmail(registeredUser);
@@ -140,5 +141,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
   private void sendVerificationEmail(User user) {
     mailService.sendVerificationEmail(user.getEmail(), user.getToken(), user.getCode());
+  }
+
+  private void checkIfConfirmationPasswordMatches(RegistrationRequest request) {
+    if (!request.password().equals(request.confirmationPassword())) {
+      throw new PasswordMissMatchException();
+    }
   }
 }

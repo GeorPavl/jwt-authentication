@@ -3,6 +3,7 @@ package gr.georpavl.jwtAuth.api.utils.exceptions.handlers;
 import gr.georpavl.jwtAuth.api.utils.exceptions.CustomErrorResponse;
 import gr.georpavl.jwtAuth.api.utils.exceptions.ErrorDetails;
 import gr.georpavl.jwtAuth.api.utils.exceptions.ExceptionUtilsFactory;
+import gr.georpavl.jwtAuth.api.utils.exceptions.implementations.PasswordMissMatchException;
 import gr.georpavl.jwtAuth.api.utils.exceptions.implementations.ResourceAlreadyPresentException;
 import gr.georpavl.jwtAuth.api.utils.exceptions.implementations.ResourceNotFoundException;
 import java.util.ArrayList;
@@ -56,6 +57,16 @@ public class GlobalExceptionHandler {
       ResourceAlreadyPresentException e) {
     var errorDetails = List.of(new ErrorDetails(HttpStatus.CONFLICT, extractErrorMessage(e)));
     return ResponseEntity.status(HttpStatus.CONFLICT).body(new CustomErrorResponse(errorDetails));
+  }
+
+  @ExceptionHandler(PasswordMissMatchException.class)
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  public ResponseEntity<CustomErrorResponse> handlePasswordMissMatchException(
+      PasswordMissMatchException e) {
+    var errorDetails =
+        List.of(new ErrorDetails(HttpStatus.INTERNAL_SERVER_ERROR, extractErrorMessage(e)));
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .body(new CustomErrorResponse(errorDetails));
   }
 
   @ExceptionHandler(DataIntegrityViolationException.class)

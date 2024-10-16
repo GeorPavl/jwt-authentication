@@ -31,4 +31,11 @@ public record RegistrationRequest(
             message = "Password should be between {min} and {max} characters long.")
         @ValidPassword
         String password,
+    @NotEmpty(message = "'Confirmation Password' is required.")
+    @Size(
+        min = 8,
+        max = 120,
+        message = "Confirmation password should be between {min} and {max} characters long.")
+    @ValidPassword
+    String confirmationPassword,
     @NotNull(message = "'Role' is required.") Role role) {}
