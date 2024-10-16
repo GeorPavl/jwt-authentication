@@ -16,6 +16,7 @@ import gr.georpavl.jwtAuth.api.security.services.JwtService;
 import gr.georpavl.jwtAuth.api.security.userDetails.UserDetailsImpl;
 import gr.georpavl.jwtAuth.api.utils.exceptions.ExceptionUtilsFactory;
 import gr.georpavl.jwtAuth.api.utils.exceptions.implementations.ResourceAlreadyPresentException;
+import gr.georpavl.jwtAuth.api.utils.mailService.MailService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,8 +38,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   private final TokenService tokenService;
   private final UserMapper userMapper;
   private final UserService userService;
-  //  private final AuthenticationManager authenticationManager;
   private final AuthenticationManagerBuilder authenticationManagerBuilder;
+  private final MailService mailService;
 
   @Override
   public AuthenticationResponse authenticate(AuthenticationRequest request) {
@@ -53,12 +54,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
   }
 
-  // FIXME: 15/10/2024 Validations, exception handling
+  // FIXME: 15/10/2024 Validations, exception handling, confirm password
   @Override
   public AuthenticationResponse register(RegistrationRequest request) {
-    var user = userMapper.toEntity(request);
     try {
+      var user = userMapper.toEntity(request);
       var registeredUser = userService.createUser(user);
+      sendVerificationEmail(registeredUser);
       return generateTokensAndReturnAuthenticationResponse(registeredUser);
     } catch (DataIntegrityViolationException e) {
       var translatedException = ExceptionUtilsFactory.of(e);
@@ -134,5 +136,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     if (!jwtService.isTokenValid(request.refreshToken(), new UserDetailsImpl(user))) {
       throw CommonSecurityException.headerError();
     }
+  }
+
+  private void sendVerificationEmail(User user) {
+    mailService.sendVerificationEmail(user.getEmail(), user.getToken(), user.getCode());
   }
 }

@@ -38,10 +38,12 @@
 		<poi.version>5.2.2</poi.version>
 		<postgres-testcontainers.version>1.19.3</postgres-testcontainers.version>
 		<uuid-creator.version>5.3.7</uuid-creator.version>
+		<java-uuid-generator.version>5.0.0</java-uuid-generator.version>
 		<spotless.version>2.43.0</spotless.version>
 		<googleJavaFormat.version>1.22.0</googleJavaFormat.version>
 		<jacoco.version>0.8.12</jacoco.version>
 		<h2.version>2.2.224</h2.version>
+		<starter-mail.version>3.3.4</starter-mail.version>
 	</properties>
 	<dependencies>
 		<!-- Spring Boot -->
@@ -130,7 +132,14 @@
 		<dependency>
 			<groupId>com.fasterxml.uuid</groupId>
 			<artifactId>java-uuid-generator</artifactId>
-			<version>5.0.0</version>
+			<version>${java-uuid-generator.version}</version>
+		</dependency>
+
+		<!-- Mail -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+			<version>${starter-mail.version}</version>
 		</dependency>
 
 		<!-- Tests -->

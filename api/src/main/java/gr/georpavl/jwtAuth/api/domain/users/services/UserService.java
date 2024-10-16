@@ -11,6 +11,7 @@ public interface UserService {
 
   User getUserById(UUID userId);
 
+  // FIXME: 16/10/2024 Remove create user and replace with register
   User createUser(User user);
 
   User updateUser(UUID userId, UpdateUserRequest request) throws NoPermissionException;

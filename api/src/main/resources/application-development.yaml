@@ -1,4 +1,6 @@
 spring:
+  config:
+    import: "mail-config-development.yaml"
   jpa:
     hibernate:
       ddl-auto: none

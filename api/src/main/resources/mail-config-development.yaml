@@ -1,0 +1,16 @@
+mail:
+  transport:
+    protocol: smtp
+  smtp:
+    auth: true
+    starttls:
+      enable: true
+  debug: false
+  host: smtp.gmail.com
+  port: 587
+  username: georpavloglou@gmail.com
+  password: gduscuqtpyllawap
+  verification:
+    url: http://127.0.0.1:8080/v1/auth/verify
+    email:
+      title: Verification Email
