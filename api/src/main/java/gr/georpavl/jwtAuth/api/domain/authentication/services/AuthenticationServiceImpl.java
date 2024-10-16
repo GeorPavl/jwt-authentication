@@ -44,13 +44,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   public AuthenticationResponse login(AuthenticationRequest request) {
     authenticateCredentials(request.email(), request.password());
     var user = findUserOrElseThrow(request.email());
-    try {
-      tokenService.revokeUsersTokens(user.getId());
-      return generateTokensAndReturnAuthenticationResponse(user);
-    } catch (Exception e) {
-      log.error("Error during authentication process for user {}", request.email(), e);
-      throw e;
-    }
+    tokenService.revokeUsersTokens(user.getId());
+    return generateTokensAndReturnAuthenticationResponse(user);
   }
 
   @Override
@@ -89,14 +84,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
    * @throws AuthenticationException if authentication fails
    */
   private void authenticateCredentials(String email, String password) {
-    try {
-      AuthenticationManager authenticationManager = authenticationManagerBuilder.getOrBuild();
-      var authentication = new UsernamePasswordAuthenticationToken(email, password);
-      authenticationManager.authenticate(authentication);
-    } catch (AuthenticationException e) {
-      log.error("Authentication failed for user {}", email, e);
-      throw e;
-    }
+    AuthenticationManager authenticationManager = authenticationManagerBuilder.getOrBuild();
+    var authentication = new UsernamePasswordAuthenticationToken(email, password);
+    authenticationManager.authenticate(authentication);
   }
 
   private User findUserOrElseThrow(String email) {

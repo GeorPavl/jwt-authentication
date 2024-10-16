@@ -44,21 +44,16 @@ public class UserServiceImpl implements UserService {
   @Transactional
   @Override
   public User updateUser(UUID userId, UpdateUserRequest request) throws NoPermissionException {
-    try {
-      userUtilsService.checkIfUserIsAdminOrAccountOwner(userId);
-      var user =
-          userJpaRepository
-              .findById(userId)
-              .orElseThrow(
-                  () ->
-                      new ResourceNotFoundException(
-                          User.class.getSimpleName(), "ID", userId.toString()));
-      var userToUpdate = userMapper.toEntity(user, request);
-      return userJpaRepository.save(userToUpdate);
-    } catch (Exception e) {
-      log.error("Error during updating user {}", request.email(), e);
-      throw e;
-    }
+    userUtilsService.checkIfUserIsAdminOrAccountOwner(userId);
+    var user =
+        userJpaRepository
+            .findById(userId)
+            .orElseThrow(
+                () ->
+                    new ResourceNotFoundException(
+                        User.class.getSimpleName(), "ID", userId.toString()));
+    var userToUpdate = userMapper.toEntity(user, request);
+    return userJpaRepository.save(userToUpdate);
   }
 
   @Override

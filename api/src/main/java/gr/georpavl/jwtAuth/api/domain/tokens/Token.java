@@ -33,17 +33,17 @@ public class Token {
   private UUID id = UUIDGenerator.generateUUID();
 
   @Column(name = "value", unique = true)
-  public String value;
+  private String value;
 
   @Column(name = "is_revoked")
-  public boolean revoked;
+  private boolean revoked;
 
   @Column(name = "is_expired")
-  public boolean expired;
+  private boolean expired;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_id")
-  public User user;
+  private User user;
 
   public static Token of(UUID id, String value, boolean isRevoked, boolean isExpired, User user) {
     return Token.builder()

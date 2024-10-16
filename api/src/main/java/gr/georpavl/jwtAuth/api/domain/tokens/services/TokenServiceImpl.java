@@ -19,12 +19,7 @@ public class TokenServiceImpl implements TokenService {
   @Override
   public Token createToken(User user, String value) {
     var token = Token.of(UUIDGenerator.generateUUID(), value, false, false, user);
-    try {
-      return tokenJpaRepository.save(token);
-    } catch (Exception e) {
-      log.warn("Error during saving token process.", e);
-      throw e;
-    }
+    return tokenJpaRepository.save(token);
   }
 
   @Override

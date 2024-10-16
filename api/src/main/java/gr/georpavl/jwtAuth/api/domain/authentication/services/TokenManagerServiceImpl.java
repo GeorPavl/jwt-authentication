@@ -31,23 +31,17 @@ public class TokenManagerServiceImpl implements TokenManagerService {
     var request = userMapper.toRefreshTokenRequest(servletRequest);
     var user = findUserOrElseThrow(request.email());
     validateTokenOrElseThrow(request, user);
-    try {
-      tokenService.revokeUsersTokens(user.getId());
-      return generateTokensAndReturnAuthenticationResponse(user);
-    } catch (Exception e) {
-      log.error("Error during token refreshing process for user", e);
-      throw e;
-    }
+    tokenService.revokeUsersTokens(user.getId());
+    return generateTokensAndReturnAuthenticationResponse(user);
   }
 
   @Override
   public String createAndSaveToken(User user, String tokenType) {
     var token =
-        (tokenType == "ACCESS")
+        (tokenType.equals("ACCESS"))
             ? jwtService.generateToken(new UserDetailsImpl(user))
             : jwtService.generateRefreshToken(new UserDetailsImpl(user));
-    tokenService.createToken(user, token);
-    return token;
+    return tokenService.createToken(user, token).getValue();
   }
 
   private void validateTokenOrElseThrow(RefreshTokenRequest request, User user) {

@@ -18,6 +18,7 @@ public class LogoutService implements LogoutHandler {
 
   private final TokenJpaRepository tokenJpaRepository;
 
+  // FIXME: 16/10/2024 Clean code method
   @Override
   public void logout(
       HttpServletRequest request, HttpServletResponse response, Authentication authentication) {

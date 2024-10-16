@@ -24,6 +24,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(Exception.class)
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   public ResponseEntity<CustomErrorResponse> handleOtherException(Exception e) {
+    log.error("Unexpected error occurred: {}", e.getMessage(), e);
     var errorDetails =
         List.of(new ErrorDetails(HttpStatus.INTERNAL_SERVER_ERROR, extractErrorMessage(e)));
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -34,6 +35,7 @@ public class GlobalExceptionHandler {
   @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
   public ResponseEntity<CustomErrorResponse> handelMethodNotValidException(
       MethodArgumentNotValidException e) {
+    log.error("Validation error: {}", e.getMessage(), e);
     var fieldErrors = e.getBindingResult().getFieldErrors();
     var errorDetails = new ArrayList<ErrorDetails>();
     for (var error : fieldErrors) {
@@ -47,6 +49,7 @@ public class GlobalExceptionHandler {
   @ResponseStatus(HttpStatus.NOT_FOUND)
   public ResponseEntity<CustomErrorResponse> handleResourceNotFoundException(
       ResourceNotFoundException e) {
+    log.error("Resource not found: {}", e.getMessage(), e);
     var errorDetails = List.of(new ErrorDetails(HttpStatus.NOT_FOUND, extractErrorMessage(e)));
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomErrorResponse(errorDetails));
   }
@@ -55,6 +58,7 @@ public class GlobalExceptionHandler {
   @ResponseStatus(HttpStatus.CONFLICT)
   public ResponseEntity<CustomErrorResponse> handleResourceAlreadyExistsException(
       ResourceAlreadyPresentException e) {
+    log.error("Resource conflict: {}", e.getMessage(), e);
     var errorDetails = List.of(new ErrorDetails(HttpStatus.CONFLICT, extractErrorMessage(e)));
     return ResponseEntity.status(HttpStatus.CONFLICT).body(new CustomErrorResponse(errorDetails));
   }
@@ -63,6 +67,7 @@ public class GlobalExceptionHandler {
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   public ResponseEntity<CustomErrorResponse> handlePasswordMissMatchException(
       PasswordMissMatchException e) {
+    log.error("Password mismatch error: {}", e.getMessage(), e);
     var errorDetails =
         List.of(new ErrorDetails(HttpStatus.INTERNAL_SERVER_ERROR, extractErrorMessage(e)));
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -74,6 +79,7 @@ public class GlobalExceptionHandler {
   public ResponseEntity<CustomErrorResponse> handleDataIntegrityViolationException(
       DataIntegrityViolationException e) {
     var translatedException = ExceptionUtilsFactory.of(e);
+    log.error("Data integrity violation: {}", translatedException.getMessage(), e);
     var errorDetails =
         List.of(new ErrorDetails(HttpStatus.CONFLICT, extractErrorMessage(translatedException)));
     return ResponseEntity.status(HttpStatus.CONFLICT).body(new CustomErrorResponse(errorDetails));
