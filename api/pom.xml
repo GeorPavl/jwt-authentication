@@ -81,6 +81,7 @@
 			<artifactId>problem-spring-web</artifactId>
 			<version>0.27.0</version>
 		</dependency>
+
 		<!-- Docs -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

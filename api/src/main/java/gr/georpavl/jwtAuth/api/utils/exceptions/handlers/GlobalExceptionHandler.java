@@ -20,6 +20,15 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Slf4j
 public class GlobalExceptionHandler {
 
+  @ExceptionHandler(Exception.class)
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  public ResponseEntity<CustomErrorResponse> handleOtherException(Exception e) {
+    var errorDetails =
+        List.of(new ErrorDetails(HttpStatus.INTERNAL_SERVER_ERROR, extractErrorMessage(e)));
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .body(new CustomErrorResponse(errorDetails));
+  }
+
   @ExceptionHandler({MethodArgumentNotValidException.class})
   @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
   public ResponseEntity<CustomErrorResponse> handelMethodNotValidException(
@@ -31,15 +40,6 @@ public class GlobalExceptionHandler {
           new ErrorDetails(HttpStatus.UNPROCESSABLE_ENTITY, error.getDefaultMessage()));
     }
     return ResponseEntity.unprocessableEntity().body(new CustomErrorResponse(errorDetails));
-  }
-
-  @ExceptionHandler(Exception.class)
-  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-  public ResponseEntity<CustomErrorResponse> handleOtherException(Exception e) {
-    var errorDetails =
-        List.of(new ErrorDetails(HttpStatus.INTERNAL_SERVER_ERROR, extractErrorMessage(e)));
-    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .body(new CustomErrorResponse(errorDetails));
   }
 
   @ExceptionHandler({ResourceNotFoundException.class})

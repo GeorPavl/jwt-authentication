@@ -1,4 +1,4 @@
-package gr.georpavl.jwtAuth.api.security.exceptions;
+package gr.georpavl.jwtAuth.api.security.exceptions.handlers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;

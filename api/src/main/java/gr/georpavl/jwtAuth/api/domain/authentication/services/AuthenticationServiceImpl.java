@@ -10,8 +10,8 @@ import gr.georpavl.jwtAuth.api.domain.users.dtos.UserResponse;
 import gr.georpavl.jwtAuth.api.domain.users.mappers.UserMapper;
 import gr.georpavl.jwtAuth.api.domain.users.repositories.UserJpaRepository;
 import gr.georpavl.jwtAuth.api.domain.users.services.UserService;
-import gr.georpavl.jwtAuth.api.security.exceptions.CommonSecurityException;
-import gr.georpavl.jwtAuth.api.security.exceptions.UserAlreadyRegisteredException;
+import gr.georpavl.jwtAuth.api.security.exceptions.implementations.CommonSecurityException;
+import gr.georpavl.jwtAuth.api.security.exceptions.implementations.UserAlreadyRegisteredException;
 import gr.georpavl.jwtAuth.api.security.services.JwtService;
 import gr.georpavl.jwtAuth.api.security.userDetails.UserDetailsImpl;
 import gr.georpavl.jwtAuth.api.utils.exceptions.ExceptionUtilsFactory;
@@ -20,8 +20,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -35,7 +37,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   private final TokenService tokenService;
   private final UserMapper userMapper;
   private final UserService userService;
-  private final DaoAuthenticationProvider authenticationProvider;
+  //  private final AuthenticationManager authenticationManager;
+  private final AuthenticationManagerBuilder authenticationManagerBuilder;
 
   @Override
   public AuthenticationResponse authenticate(AuthenticationRequest request) {
@@ -101,9 +104,23 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     return refreshToken;
   }
 
+  /**
+   * Authenticates the user's credentials using an AuthenticationManager built with
+   * AuthenticationManagerBuilder. This approach is chosen over injecting an AuthenticationManager
+   * bean directly to avoid potential circular dependencies and to allow for dynamic creation of the
+   * AuthenticationManager when needed.
+   *
+   * @throws AuthenticationException if authentication fails
+   */
   private void authenticateCredentials(String email, String password) {
-    // TODO: 15/10/2024 Check the response of the exception
-    authenticationProvider.authenticate(new UsernamePasswordAuthenticationToken(email, password));
+    try {
+      AuthenticationManager authenticationManager = authenticationManagerBuilder.getOrBuild();
+      var authentication = new UsernamePasswordAuthenticationToken(email, password);
+      authenticationManager.authenticate(authentication);
+    } catch (AuthenticationException e) {
+      log.error("Authentication failed for user {}", email, e);
+      throw e;
+    }
   }
 
   private User findUserOrElseThrow(String email) {

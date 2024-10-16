@@ -5,7 +5,7 @@ import gr.georpavl.jwtAuth.api.domain.authentication.dtos.RegistrationRequest;
 import gr.georpavl.jwtAuth.api.domain.users.User;
 import gr.georpavl.jwtAuth.api.domain.users.dtos.UpdateUserRequest;
 import gr.georpavl.jwtAuth.api.domain.users.dtos.UserResponse;
-import gr.georpavl.jwtAuth.api.security.exceptions.CommonSecurityException;
+import gr.georpavl.jwtAuth.api.security.exceptions.implementations.CommonSecurityException;
 import gr.georpavl.jwtAuth.api.security.services.JwtService;
 import gr.georpavl.jwtAuth.api.utils.generators.RandomCodeGenerator;
 import gr.georpavl.jwtAuth.api.utils.generators.TokenGenerator;

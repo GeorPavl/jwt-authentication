@@ -1,5 +1,7 @@
-package gr.georpavl.jwtAuth.api.security.exceptions;
+package gr.georpavl.jwtAuth.api.security.exceptions.handlers;
 
+import gr.georpavl.jwtAuth.api.security.exceptions.implementations.NoPermissionException;
+import gr.georpavl.jwtAuth.api.security.exceptions.implementations.UnauthorizedAccessException;
 import gr.georpavl.jwtAuth.api.utils.exceptions.CustomErrorResponse;
 import gr.georpavl.jwtAuth.api.utils.exceptions.ErrorDetails;
 import java.util.List;

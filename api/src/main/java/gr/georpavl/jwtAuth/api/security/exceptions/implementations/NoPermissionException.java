@@ -1,4 +1,4 @@
-package gr.georpavl.jwtAuth.api.security.exceptions;
+package gr.georpavl.jwtAuth.api.security.exceptions.implementations;
 
 public class NoPermissionException extends RuntimeException {
 

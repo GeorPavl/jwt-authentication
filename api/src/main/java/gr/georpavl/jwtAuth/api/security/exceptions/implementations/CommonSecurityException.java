@@ -1,4 +1,4 @@
-package gr.georpavl.jwtAuth.api.security.exceptions;
+package gr.georpavl.jwtAuth.api.security.exceptions.implementations;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static org.zalando.problem.Status.FORBIDDEN;

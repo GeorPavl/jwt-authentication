@@ -32,7 +32,7 @@ public class AuthenticationController {
 
   @PostMapping("/register")
   public ResponseEntity<AuthenticationResponse> register(
-      @RequestBody @Valid RegistrationRequest request) {
+      @Valid @RequestBody RegistrationRequest request) {
     var result = authenticationService.register(request);
     log.info("User is registered successfully.");
     return ResponseEntity.accepted().body(result);
