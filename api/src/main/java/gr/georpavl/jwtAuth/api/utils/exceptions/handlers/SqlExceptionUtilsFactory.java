@@ -1,4 +1,4 @@
-package gr.georpavl.jwtAuth.api.utils.exceptions;
+package gr.georpavl.jwtAuth.api.utils.exceptions.handlers;
 
 import gr.georpavl.jwtAuth.api.utils.exceptions.implementations.ResourceAlreadyPresentException;
 import java.sql.SQLException;

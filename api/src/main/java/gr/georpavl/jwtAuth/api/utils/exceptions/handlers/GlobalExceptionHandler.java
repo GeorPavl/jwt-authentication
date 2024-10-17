@@ -2,7 +2,6 @@ package gr.georpavl.jwtAuth.api.utils.exceptions.handlers;
 
 import gr.georpavl.jwtAuth.api.utils.exceptions.CustomErrorResponse;
 import gr.georpavl.jwtAuth.api.utils.exceptions.ErrorDetails;
-import gr.georpavl.jwtAuth.api.utils.exceptions.SqlExceptionUtilsFactory;
 import gr.georpavl.jwtAuth.api.utils.exceptions.implementations.PasswordMissMatchException;
 import gr.georpavl.jwtAuth.api.utils.exceptions.implementations.ResourceAlreadyPresentException;
 import gr.georpavl.jwtAuth.api.utils.exceptions.implementations.ResourceNotFoundException;

@@ -1,4 +1,4 @@
-package gr.georpavl.jwtAuth.api.security.exceptions;
+package gr.georpavl.jwtAuth.api.security.exceptions.handlers;
 
 import gr.georpavl.jwtAuth.api.security.exceptions.implementations.NoPermissionException;
 import gr.georpavl.jwtAuth.api.security.exceptions.implementations.UnauthorizedAccessException;
@@ -62,9 +62,7 @@ public class SecurityExceptionFactory {
     } else if (e.getMessage().contains("permission denied")) {
       return new NoPermissionException("Permission denied to access this resource.");
     } else {
-      // Προεπιλεγμένο μήνυμα για όλες τις άλλες περιπτώσεις `AccessDeniedException`
       return new NoPermissionException("Access denied due to insufficient permissions.");
     }
   }
-
 }

@@ -19,7 +19,8 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class TokenManagerServiceImpl implements TokenManagerService {
+public class AuthorizationTokensManagementServiceImpl
+    implements AuthorizationTokensManagementService {
 
   private final UserMapper userMapper;
   private final UserJpaRepository userJpaRepository;

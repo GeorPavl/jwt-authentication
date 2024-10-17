@@ -15,17 +15,19 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class UserVerificationService {
+public class VerificationServiceImpl implements VerificationService {
 
   private final UserJpaRepository userJpaRepository;
   private final MailService mailService;
 
+  @Override
   public void verify(String token, Integer code) {
     var user = getUserIfSessionNotExpired(code);
     isVerificationTokenValid(token, user);
     enableAndVerifyUserAccount(user);
   }
 
+  @Override
   public void resendVerificationEmail(String userEmail) {
     var user = findUserOrElseThrow(userEmail);
     if (user.isEnabled()) {

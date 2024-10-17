@@ -18,7 +18,7 @@ public class UserCleanupScheduler {
   private final TokenJpaRepository tokenJpaRepository;
 
   /**
-   * Scheduled task that runs every two minutes to clean up expired user accounts and tokens.
+   * Scheduled task that runs every midnight to clean up expired user accounts and tokens.
    *
    * <p>This method performs two main functions: - Deletes users who have not verified their
    * accounts and whose token expiration time has passed. - Removes revoked and expired tokens from

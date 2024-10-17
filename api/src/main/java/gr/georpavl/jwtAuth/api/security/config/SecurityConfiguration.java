@@ -5,7 +5,6 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 
 import gr.georpavl.jwtAuth.api.domain.users.Role;
 import gr.georpavl.jwtAuth.api.security.exceptions.handlers.CustomAccessDeniedHandler;
-import gr.georpavl.jwtAuth.api.security.exceptions.handlers.UserAuthenticationErrorHandler;
 import gr.georpavl.jwtAuth.api.security.filters.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +15,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
@@ -35,6 +33,7 @@ public class SecurityConfiguration {
   private final JwtAuthenticationFilter jwtAuthenticationFilter;
   private final CorsConfiguration corsConfiguration;
   private final CustomAccessDeniedHandler customAccessDeniedHandler;
+  private final CustomAuthenticationEntryPoint authenticationEntryPoint;
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -101,7 +100,7 @@ public class SecurityConfiguration {
     http.exceptionHandling(
         exception ->
             exception
-                .authenticationEntryPoint(userAuthenticationErrorHandler())
+                .authenticationEntryPoint(authenticationEntryPoint.userAuthenticationErrorHandler())
                 .accessDeniedHandler(customAccessDeniedHandler));
   }
 
@@ -118,21 +117,5 @@ public class SecurityConfiguration {
                 .addLogoutHandler(logoutHandler)
                 .logoutSuccessHandler(
                     (request, response, authentication) -> SecurityContextHolder.clearContext()));
-  }
-
-  /**
-   * Defines a custom AuthenticationEntryPoint to handle unauthorized access attempts. Sets a realm
-   * name for unauthorized responses, which provides additional context to clients about the
-   * authentication method being used (in this case, JWT-based). This configuration helps ensure
-   * that unauthorized users receive a clear, standardized response, facilitating client-side error
-   * handling and improving security transparency.
-   *
-   * @return A configured UserAuthenticationErrorHandler instance
-   */
-  @Bean
-  public AuthenticationEntryPoint userAuthenticationErrorHandler() {
-    var userAuthenticationErrorHandler = new UserAuthenticationErrorHandler();
-    userAuthenticationErrorHandler.setRealmName("JWT Authentication");
-    return userAuthenticationErrorHandler;
   }
 }
