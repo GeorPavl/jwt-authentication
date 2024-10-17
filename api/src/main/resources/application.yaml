@@ -20,7 +20,7 @@ logging:
     org:
       hibernate: INFO
       springframework:
-        web: DEBUG
+        web: INFO
         security: DEBUG
       nodeValue: DEBUG
     guru:

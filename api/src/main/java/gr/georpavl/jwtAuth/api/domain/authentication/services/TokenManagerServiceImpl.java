@@ -44,16 +44,17 @@ public class TokenManagerServiceImpl implements TokenManagerService {
     return tokenService.createToken(user, token).getValue();
   }
 
+  @Override
+  public AuthenticationResponse generateTokensAndReturnAuthenticationResponse(User user) {
+    var accessToken = createAndSaveToken(user, "ACCESS");
+    var refreshToken = createAndSaveToken(user, "REFRESH");
+    return AuthenticationResponse.of(UserResponse.of(user), accessToken, refreshToken);
+  }
+
   private void validateTokenOrElseThrow(RefreshTokenRequest request, User user) {
     if (!jwtService.isTokenValid(request.refreshToken(), new UserDetailsImpl(user))) {
       throw CommonSecurityException.headerError();
     }
-  }
-
-  private AuthenticationResponse generateTokensAndReturnAuthenticationResponse(User user) {
-    var accessToken = createAndSaveToken(user, "ACCESS");
-    var refreshToken = createAndSaveToken(user, "REFRESH");
-    return AuthenticationResponse.of(UserResponse.of(user), accessToken, refreshToken);
   }
 
   private User findUserOrElseThrow(String email) {

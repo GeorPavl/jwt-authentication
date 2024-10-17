@@ -4,6 +4,7 @@ import static org.springframework.http.HttpMethod.DELETE;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 import gr.georpavl.jwtAuth.api.domain.users.Role;
+import gr.georpavl.jwtAuth.api.security.exceptions.handlers.CustomAccessDeniedHandler;
 import gr.georpavl.jwtAuth.api.security.exceptions.handlers.UserAuthenticationErrorHandler;
 import gr.georpavl.jwtAuth.api.security.filters.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
@@ -28,9 +29,12 @@ import org.springframework.security.web.authentication.logout.LogoutHandler;
 public class SecurityConfiguration {
 
   private static final String API_V_1_USERS = "/api/v1/users/**";
+  public static final String API_V_1_AUTH_LOGOUT = "/api/v1/auth/logout";
+
   private final LogoutHandler logoutHandler;
   private final JwtAuthenticationFilter jwtAuthenticationFilter;
   private final CorsConfiguration corsConfiguration;
+  private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -90,12 +94,15 @@ public class SecurityConfiguration {
 
   /**
    * Sets a custom entry point for handling authentication exceptions, ensuring that unauthorized
-   * access attempts receive a consistent error response. This approach provides clearer feedback to
-   * clients about authentication failures and standardizes error handling.
+   * access attempts to receive a consistent error response. This approach provides clearer feedback
+   * to clients about authentication failures and standardizes error handling.
    */
   private void configureExceptionHandling(HttpSecurity http) throws Exception {
     http.exceptionHandling(
-        exception -> exception.authenticationEntryPoint(userAuthenticationErrorHandler()));
+        exception ->
+            exception
+                .authenticationEntryPoint(userAuthenticationErrorHandler())
+                .accessDeniedHandler(customAccessDeniedHandler));
   }
 
   /**
@@ -107,7 +114,7 @@ public class SecurityConfiguration {
     http.logout(
         logout ->
             logout
-                .logoutUrl("/api/v1/auth/logout")
+                .logoutUrl(API_V_1_AUTH_LOGOUT)
                 .addLogoutHandler(logoutHandler)
                 .logoutSuccessHandler(
                     (request, response, authentication) -> SecurityContextHolder.clearContext()));
@@ -125,8 +132,7 @@ public class SecurityConfiguration {
   @Bean
   public AuthenticationEntryPoint userAuthenticationErrorHandler() {
     var userAuthenticationErrorHandler = new UserAuthenticationErrorHandler();
-    userAuthenticationErrorHandler.setRealmName(
-        "JWT Authentication"); // Set realm name for unauthorized responses
+    userAuthenticationErrorHandler.setRealmName("JWT Authentication");
     return userAuthenticationErrorHandler;
   }
 }

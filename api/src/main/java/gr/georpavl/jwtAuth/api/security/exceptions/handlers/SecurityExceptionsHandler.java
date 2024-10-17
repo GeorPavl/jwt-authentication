@@ -30,7 +30,7 @@ public class SecurityExceptionsHandler {
   @ResponseStatus(HttpStatus.UNAUTHORIZED)
   public ResponseEntity<CustomErrorResponse> handleOtherException(UnauthorizedAccessException ex) {
     log.error("Unauthorized access error: {}", ex.getMessage(), ex);
-    var errorDetails = List.of(new ErrorDetails(HttpStatus.UNAUTHORIZED, "Unauthorized"));
+    var errorDetails = List.of(new ErrorDetails(HttpStatus.UNAUTHORIZED, ex.getMessage()));
 
     return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
         .body(new CustomErrorResponse(errorDetails));

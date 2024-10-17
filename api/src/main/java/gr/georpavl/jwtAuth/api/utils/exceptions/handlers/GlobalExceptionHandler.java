@@ -2,7 +2,7 @@ package gr.georpavl.jwtAuth.api.utils.exceptions.handlers;
 
 import gr.georpavl.jwtAuth.api.utils.exceptions.CustomErrorResponse;
 import gr.georpavl.jwtAuth.api.utils.exceptions.ErrorDetails;
-import gr.georpavl.jwtAuth.api.utils.exceptions.ExceptionUtilsFactory;
+import gr.georpavl.jwtAuth.api.utils.exceptions.SqlExceptionUtilsFactory;
 import gr.georpavl.jwtAuth.api.utils.exceptions.implementations.PasswordMissMatchException;
 import gr.georpavl.jwtAuth.api.utils.exceptions.implementations.ResourceAlreadyPresentException;
 import gr.georpavl.jwtAuth.api.utils.exceptions.implementations.ResourceNotFoundException;
@@ -78,7 +78,7 @@ public class GlobalExceptionHandler {
   @ResponseStatus(HttpStatus.CONFLICT)
   public ResponseEntity<CustomErrorResponse> handleDataIntegrityViolationException(
       DataIntegrityViolationException e) {
-    var translatedException = ExceptionUtilsFactory.of(e);
+    var translatedException = SqlExceptionUtilsFactory.of(e);
     log.error("Data integrity violation: {}", translatedException.getMessage(), e);
     var errorDetails =
         List.of(new ErrorDetails(HttpStatus.CONFLICT, extractErrorMessage(translatedException)));

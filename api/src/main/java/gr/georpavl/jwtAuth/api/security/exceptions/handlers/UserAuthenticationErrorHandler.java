@@ -1,10 +1,12 @@
 package gr.georpavl.jwtAuth.api.security.exceptions.handlers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import gr.georpavl.jwtAuth.api.security.exceptions.SecurityExceptionFactory;
+import gr.georpavl.jwtAuth.api.security.exceptions.implementations.NoPermissionException;
+import gr.georpavl.jwtAuth.api.security.exceptions.implementations.UnauthorizedAccessException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
@@ -24,17 +26,23 @@ public class UserAuthenticationErrorHandler extends BasicAuthenticationEntryPoin
   public void commence(
       HttpServletRequest request, HttpServletResponse response, AuthenticationException ex)
       throws IOException {
-    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
     response.setContentType("application/json");
-    log.error("Authentication error: {}", ex.getMessage(), ex);
-    var errorMessage =
-        "The access token provided has expired, revoked, erroneous, or is otherwise invalid.";
+    RuntimeException translatedException = SecurityExceptionFactory.handleSecurityException(ex);
+    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
-    var jsonErrorMessage =
+    if (translatedException instanceof UnauthorizedAccessException) {
+      log.error("Access denied error: {}", ex.getMessage(), ex);
+    } else if (translatedException instanceof NoPermissionException) {
+      response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+      log.error("Authentication error: {}", ex.getMessage(), ex);
+    } else {
+      log.error("Unknown security exception: {}", ex.getMessage(), ex);
+    }
+
+    String jsonErrorMessage =
         this.objectMapper.writeValueAsString(
-            Map.of("errors", Map.of("UNAUTHORIZED:", List.of(errorMessage))));
+            Map.of("errors", Map.of("error", List.of(translatedException.getMessage()))));
 
-    final PrintWriter writer = response.getWriter();
-    writer.println(jsonErrorMessage);
+    response.getWriter().println(jsonErrorMessage);
   }
 }

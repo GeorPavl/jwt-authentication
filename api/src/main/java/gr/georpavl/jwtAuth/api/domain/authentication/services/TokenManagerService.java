@@ -8,4 +8,6 @@ public interface TokenManagerService {
   AuthenticationResponse refreshToken(HttpServletRequest request);
 
   String createAndSaveToken(User user, String tokenType);
+
+  AuthenticationResponse generateTokensAndReturnAuthenticationResponse(User user);
 }
