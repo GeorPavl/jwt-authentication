@@ -43,7 +43,7 @@ public class SecurityConfiguration {
     configureSessionManagement(http); // Use stateless session management for JWT
     configureExceptionHandling(http); // Handle authentication exceptions
     configureLogout(http); // Define custom logout behavior and handlers
-    http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+    configureAuthenticationFilter(http);
     return http.build();
   }
 
@@ -117,5 +117,21 @@ public class SecurityConfiguration {
                 .addLogoutHandler(logoutHandler)
                 .logoutSuccessHandler(
                     (request, response, authentication) -> SecurityContextHolder.clearContext()));
+  }
+
+  /**
+   * Adds the custom JWT authentication filter to the security filter chain. This filter is executed
+   * before the standard {@link UsernamePasswordAuthenticationFilter} to intercept requests and
+   * validate JWT tokens. If a valid token is found, the user is authenticated, and the request is
+   * allowed to proceed. This ensures that requests carry a valid JWT token for authentication and
+   * that user identity is verified before processing.
+   *
+   * <p>The filter also supports stateless authentication, making it suitable for APIs that don't
+   * maintain server-side sessions.
+   *
+   * @param http The {@link HttpSecurity} object for configuring web-based security.
+   */
+  private void configureAuthenticationFilter(HttpSecurity http) {
+    http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
   }
 }

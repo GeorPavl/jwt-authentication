@@ -4,7 +4,7 @@ import gr.georpavl.jwtAuth.api.domain.authentication.dtos.AuthenticationResponse
 import gr.georpavl.jwtAuth.api.domain.authentication.dtos.RegistrationRequest;
 import gr.georpavl.jwtAuth.api.domain.users.User;
 import gr.georpavl.jwtAuth.api.domain.users.mappers.UserMapper;
-import gr.georpavl.jwtAuth.api.domain.users.services.UserService;
+import gr.georpavl.jwtAuth.api.domain.users.repositories.UserJpaRepository;
 import gr.georpavl.jwtAuth.api.security.exceptions.handlers.SecurityExceptionFactory;
 import gr.georpavl.jwtAuth.api.security.exceptions.implementations.UserAlreadyRegisteredException;
 import gr.georpavl.jwtAuth.api.utils.exceptions.handlers.SqlExceptionUtilsFactory;
@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class RegistrationServiceImpl implements RegistrationService {
 
-  private final UserService userService;
+  private final UserJpaRepository userJpaRepository;
   private final UserMapper userMapper;
   private final AuthorizationTokensManagementService authorizationTokensManagementService;
   private final MailService mailService;
@@ -46,7 +46,7 @@ public class RegistrationServiceImpl implements RegistrationService {
   }
 
   private User createUser(RegistrationRequest request) {
-    return userService.createUser(userMapper.toEntity(request));
+    return userJpaRepository.save(userMapper.toEntity(request));
   }
 
   private void sendVerificationEmail(User user) {

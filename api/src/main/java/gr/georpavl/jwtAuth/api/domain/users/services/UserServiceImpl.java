@@ -2,11 +2,13 @@ package gr.georpavl.jwtAuth.api.domain.users.services;
 
 import gr.georpavl.jwtAuth.api.domain.users.User;
 import gr.georpavl.jwtAuth.api.domain.users.dtos.UpdateUserRequest;
+import gr.georpavl.jwtAuth.api.domain.users.dtos.UserResponse;
 import gr.georpavl.jwtAuth.api.domain.users.mappers.UserMapper;
 import gr.georpavl.jwtAuth.api.domain.users.repositories.UserJpaRepository;
 import gr.georpavl.jwtAuth.api.utils.exceptions.implementations.ResourceNotFoundException;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import javax.naming.NoPermissionException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,27 +25,28 @@ public class UserServiceImpl implements UserService {
   private final UserUtilsService userUtilsService;
 
   @Override
-  public List<User> getAllUsers() {
-    return userJpaRepository.findAll();
+  public List<UserResponse> getAllUsers() {
+    return userJpaRepository.findAll().stream()
+        .map(userMapper::toResponse)
+        .collect(Collectors.toList());
   }
 
   @Override
-  public User getUserById(UUID userId) {
-    return userJpaRepository
-        .findById(userId)
-        .orElseThrow(
-            () ->
-                new ResourceNotFoundException(User.class.getSimpleName(), "ID", userId.toString()));
-  }
-
-  @Override
-  public User createUser(User user) {
-    return userJpaRepository.save(user);
+  public UserResponse getUserById(UUID userId) {
+    var user =
+        userJpaRepository
+            .findById(userId)
+            .orElseThrow(
+                () ->
+                    new ResourceNotFoundException(
+                        User.class.getSimpleName(), "ID", userId.toString()));
+    return userMapper.toResponse(user);
   }
 
   @Transactional
   @Override
-  public User updateUser(UUID userId, UpdateUserRequest request) throws NoPermissionException {
+  public UserResponse updateUser(UUID userId, UpdateUserRequest request)
+      throws NoPermissionException {
     userUtilsService.checkIfUserIsAdminOrAccountOwner(userId);
     var user =
         userJpaRepository
@@ -53,7 +56,8 @@ public class UserServiceImpl implements UserService {
                     new ResourceNotFoundException(
                         User.class.getSimpleName(), "ID", userId.toString()));
     var userToUpdate = userMapper.toEntity(user, request);
-    return userJpaRepository.save(userToUpdate);
+    var savedUser = userJpaRepository.save(userToUpdate);
+    return userMapper.toResponse(savedUser);
   }
 
   @Override

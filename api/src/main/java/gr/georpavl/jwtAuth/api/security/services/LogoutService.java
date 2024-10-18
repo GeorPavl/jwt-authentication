@@ -1,10 +1,12 @@
 package gr.georpavl.jwtAuth.api.security.services;
 
+import gr.georpavl.jwtAuth.api.domain.tokens.Token;
 import gr.georpavl.jwtAuth.api.domain.tokens.repositories.TokenJpaRepository;
 import gr.georpavl.jwtAuth.api.utils.exceptions.implementations.HttpServletResponseWriterException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -18,46 +20,52 @@ public class LogoutService implements LogoutHandler {
 
   private final TokenJpaRepository tokenJpaRepository;
 
-  // FIXME: 16/10/2024 Clean code method
   @Override
   public void logout(
       HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
     final var authHeader = request.getHeader("Authorization");
-    final String jwt;
+    if (isAuthorizationHeaderInvalid(authHeader)) return;
+    var storedToken = findTokenByJwt(authHeader);
+    handleTokenAndRespond(response, storedToken);
+  }
 
-    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-      return;
-    }
-
-    jwt = authHeader.substring(7);
-
-    var storedToken = tokenJpaRepository.findByValue(jwt).orElse(null);
-
-    if (storedToken != null) {
-      storedToken.setExpired(true);
-      storedToken.setRevoked(true);
-      tokenJpaRepository.save(storedToken);
-      SecurityContextHolder.clearContext();
-      // Set response if success
-      var message = "Logout successful";
-      response.setStatus(HttpStatus.ACCEPTED.value());
-      response.setContentType("text/plain"); // Set content type as needed
-      try {
-        response.getWriter().write(message);
-      } catch (IOException e) {
-        throw new HttpServletResponseWriterException(e.getMessage());
-      }
+  private void handleTokenAndRespond(HttpServletResponse response, Optional<Token> storedToken) {
+    if (storedToken.isPresent()) {
+      invalidateToken(storedToken.get());
+      buildHttpResponse(response, LogoutMessages.SUCCESS.getMessage(), HttpStatus.ACCEPTED);
     } else {
-      // Set a different message in the response
-      var errorMessage = "Invalid token or user";
-      response.setStatus(HttpStatus.NOT_ACCEPTABLE.value());
-      response.setContentType("text/plain"); // Set content type as needed
+      buildHttpResponse(
+          response, LogoutMessages.INVALID_TOKEN.getMessage(), HttpStatus.NOT_ACCEPTABLE);
+    }
+  }
 
-      try {
-        response.getWriter().write(errorMessage);
-      } catch (IOException e) {
-        throw new HttpServletResponseWriterException(e.getMessage());
-      }
+  private void invalidateToken(Token storedToken) {
+    storedToken.setExpired(true);
+    storedToken.setRevoked(true);
+    tokenJpaRepository.save(storedToken);
+    SecurityContextHolder.clearContext();
+  }
+
+  private Optional<Token> findTokenByJwt(String authHeader) {
+    final var jwt = authHeader.substring(7);
+    return tokenJpaRepository.findByValue(jwt);
+  }
+
+  private static boolean isAuthorizationHeaderInvalid(String authHeader) {
+    return authHeader == null || !authHeader.startsWith("Bearer ");
+  }
+
+  private void buildHttpResponse(HttpServletResponse response, String message, HttpStatus status) {
+    response.setContentType("text/plain");
+    response.setStatus(status.value());
+    writeResponseMessage(response, message);
+  }
+
+  private static void writeResponseMessage(HttpServletResponse response, String message) {
+    try {
+      response.getWriter().write(message);
+    } catch (IOException e) {
+      throw new HttpServletResponseWriterException(e.getMessage());
     }
   }
 }

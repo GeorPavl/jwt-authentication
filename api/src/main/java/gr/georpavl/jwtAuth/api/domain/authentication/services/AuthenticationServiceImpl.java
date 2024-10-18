@@ -3,6 +3,7 @@ package gr.georpavl.jwtAuth.api.domain.authentication.services;
 import gr.georpavl.jwtAuth.api.domain.authentication.dtos.AuthenticationRequest;
 import gr.georpavl.jwtAuth.api.domain.authentication.dtos.AuthenticationResponse;
 import gr.georpavl.jwtAuth.api.domain.authentication.dtos.RegistrationRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   private final RegistrationService registrationService;
   private final VerificationService verificationService;
   private final LoginService loginService;
+  private final AuthorizationTokensManagementService authorizationTokensManagementService;
 
   @Override
   public AuthenticationResponse login(AuthenticationRequest request) {
@@ -34,5 +36,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   @Override
   public void resendVerificationEmail(String userEmail) {
     verificationService.resendVerificationEmail(userEmail);
+  }
+
+  @Override
+  public AuthenticationResponse refreshToken(HttpServletRequest request) {
+    return authorizationTokensManagementService.refreshToken(request);
   }
 }
