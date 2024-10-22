@@ -64,7 +64,6 @@ public class JwtService {
 
   public boolean isTokenValid(String token, UserDetails userDetails) {
     final var username = extractUsername(token);
-
     return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
   }
 
@@ -86,7 +85,6 @@ public class JwtService {
 
   private Key getSignInKey() {
     var keyBytes = Decoders.BASE64.decode(secretKey);
-
     return Keys.hmacShaKeyFor(keyBytes);
   }
 }

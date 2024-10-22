@@ -1,0 +1,45 @@
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+  <changeSet id="create-tokens-table" author="georpavl">
+    <createTable tableName="tokens">
+      <column name="id" type="UUID">
+        <constraints primaryKey="true" nullable="false" unique="true"/>
+      </column>
+      <column name="value" type="VARCHAR(255)">
+        <constraints nullable="false" unique="true"/>
+      </column>
+      <column name="is_revoked" type="BOOLEAN">
+        <constraints nullable="false"/>
+      </column>
+      <column name="is_expired" type="BOOLEAN">
+        <constraints nullable="false"/>
+      </column>
+      <column name="user_id" type="UUID">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="tokens"
+      baseColumnNames="user_id"
+      constraintName="fk_tokens_user"
+      referencedTableName="users"
+      referencedColumnNames="id"/>
+  </changeSet>
+
+  <!-- Insert expired token for user1 -->
+  <changeSet id="insert-expired-token-for-user1" author="georpavl">
+    <insert tableName="tokens">
+      <column name="id" value="3e02b0a0-7c92-11e8-adc0-fa7ae01bbebf"/>
+      <column name="value" value="eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyMUBleGFtcGxlLmNvbSIsImV4cCI6MTY0MDAwMDAwMH0.eXpiredTokenSignature123"/>
+      <column name="is_revoked" value="false"/>
+      <column name="is_expired" value="true"/>
+      <column name="user_id" value="1e02b0a0-7c92-11e8-adc0-fa7ae01bbebc"/>
+    </insert>
+  </changeSet>
+
+
+</databaseChangeLog>

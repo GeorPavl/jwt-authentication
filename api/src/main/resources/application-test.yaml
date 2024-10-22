@@ -1,0 +1,14 @@
+spring:
+  config:
+    import: "mail-config-development.yaml"
+  jpa:
+    hibernate:
+      ddl-auto: none
+  datasource:
+    username: AdminTest1
+    url: jdbc:postgresql://localhost:5433/jwt-auth-testing
+    password: JwtAuthTest123!@#
+  liquibase:
+    change-log: classpath:testDB/changelog-master.xml
+    enabled: true
+    clear-checksums: true
