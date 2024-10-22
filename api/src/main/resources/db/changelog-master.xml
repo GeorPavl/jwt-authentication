@@ -6,6 +6,5 @@
 
   <!-- Include files -->
   <include file="db/changelog-user.xml"/>
-  <include file="db/changelog-token.xml"/>
 
 </databaseChangeLog>

@@ -10,10 +10,6 @@ public class UserFixture {
 
   public static UpdateUserRequest createUpdateRequest() {
     return UpdateUserRequest.of(
-        "updatedEmail@example.com",
-        "JohnUpdated",
-        "DoeUpdated",
-        "111111111"
-    );
+        "updatedEmail@example.com", "JohnUpdated", "DoeUpdated", "111111111");
   }
 }

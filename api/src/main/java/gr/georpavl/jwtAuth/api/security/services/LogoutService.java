@@ -1,12 +1,9 @@
 package gr.georpavl.jwtAuth.api.security.services;
 
-import gr.georpavl.jwtAuth.api.domain.tokens.Token;
-import gr.georpavl.jwtAuth.api.domain.tokens.repositories.TokenJpaRepository;
 import gr.georpavl.jwtAuth.api.utils.exceptions.implementations.HttpServletResponseWriterException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -18,37 +15,18 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class LogoutService implements LogoutHandler {
 
-  private final TokenJpaRepository tokenJpaRepository;
-
   @Override
   public void logout(
       HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
     final var authHeader = request.getHeader("Authorization");
-    if (isAuthorizationHeaderInvalid(authHeader)) return;
-    var storedToken = findTokenByJwt(authHeader);
-    handleTokenAndRespond(response, storedToken);
+    if (isAuthorizationHeaderInvalid(authHeader))
+      buildHttpResponse(response, LogoutMessages.INVALID_TOKEN.getMessage(), HttpStatus.CONFLICT);
+    invalidateToken();
+    buildHttpResponse(response, LogoutMessages.SUCCESS.getMessage(), HttpStatus.ACCEPTED);
   }
 
-  private void handleTokenAndRespond(HttpServletResponse response, Optional<Token> storedToken) {
-    if (storedToken.isPresent()) {
-      invalidateToken(storedToken.get());
-      buildHttpResponse(response, LogoutMessages.SUCCESS.getMessage(), HttpStatus.ACCEPTED);
-    } else {
-      buildHttpResponse(
-          response, LogoutMessages.INVALID_TOKEN.getMessage(), HttpStatus.NOT_ACCEPTABLE);
-    }
-  }
-
-  private void invalidateToken(Token storedToken) {
-    storedToken.setExpired(true);
-    storedToken.setRevoked(true);
-    tokenJpaRepository.save(storedToken);
+  private void invalidateToken() {
     SecurityContextHolder.clearContext();
-  }
-
-  private Optional<Token> findTokenByJwt(String authHeader) {
-    final var jwt = authHeader.substring(7);
-    return tokenJpaRepository.findByValue(jwt);
   }
 
   private static boolean isAuthorizationHeaderInvalid(String authHeader) {

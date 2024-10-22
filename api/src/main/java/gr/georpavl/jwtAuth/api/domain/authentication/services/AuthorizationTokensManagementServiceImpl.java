@@ -2,7 +2,6 @@ package gr.georpavl.jwtAuth.api.domain.authentication.services;
 
 import gr.georpavl.jwtAuth.api.domain.authentication.dtos.AuthenticationResponse;
 import gr.georpavl.jwtAuth.api.domain.authentication.dtos.RefreshTokenRequest;
-import gr.georpavl.jwtAuth.api.domain.tokens.services.TokenService;
 import gr.georpavl.jwtAuth.api.domain.users.User;
 import gr.georpavl.jwtAuth.api.domain.users.dtos.UserResponse;
 import gr.georpavl.jwtAuth.api.domain.users.mappers.UserMapper;
@@ -24,7 +23,6 @@ public class AuthorizationTokensManagementServiceImpl
 
   private final UserMapper userMapper;
   private final UserJpaRepository userJpaRepository;
-  private final TokenService tokenService;
   private final JwtService jwtService;
 
   @Override
@@ -32,17 +30,14 @@ public class AuthorizationTokensManagementServiceImpl
     var request = userMapper.toRefreshTokenRequest(servletRequest);
     var user = findUserOrElseThrow(request.email());
     validateTokenOrElseThrow(request, user);
-    tokenService.revokeUsersTokens(user.getId());
     return generateTokensAndReturnAuthenticationResponse(user);
   }
 
   @Override
   public String createAndSaveToken(User user, String tokenType) {
-    var token =
-        (tokenType.equals("ACCESS"))
-            ? jwtService.generateToken(new UserDetailsImpl(user))
-            : jwtService.generateRefreshToken(new UserDetailsImpl(user));
-    return tokenService.createToken(user, token).getValue();
+    return (tokenType.equals("ACCESS"))
+        ? jwtService.generateToken(new UserDetailsImpl(user))
+        : jwtService.generateRefreshToken(new UserDetailsImpl(user));
   }
 
   @Override

@@ -2,7 +2,6 @@ package gr.georpavl.jwtAuth.api.domain.authentication.services;
 
 import gr.georpavl.jwtAuth.api.domain.authentication.dtos.AuthenticationRequest;
 import gr.georpavl.jwtAuth.api.domain.authentication.dtos.AuthenticationResponse;
-import gr.georpavl.jwtAuth.api.domain.tokens.services.TokenService;
 import gr.georpavl.jwtAuth.api.domain.users.User;
 import gr.georpavl.jwtAuth.api.domain.users.repositories.UserJpaRepository;
 import gr.georpavl.jwtAuth.api.security.exceptions.handlers.SecurityExceptionFactory;
@@ -20,7 +19,6 @@ import org.springframework.stereotype.Service;
 public class LoginServiceImpl implements LoginService {
 
   private final UserJpaRepository userJpaRepository;
-  private final TokenService tokenService;
   private final AuthorizationTokensManagementService authorizationTokensManagementService;
   private final AuthenticationManagerBuilder authenticationManagerBuilder;
 
@@ -37,7 +35,6 @@ public class LoginServiceImpl implements LoginService {
     try {
       authenticateCredentials(request.email(), request.password());
       var user = findUserOrElseThrow(request.email());
-      tokenService.revokeUsersTokens(user.getId());
       return authorizationTokensManagementService.generateTokensAndReturnAuthenticationResponse(
           user);
     } catch (Exception e) {

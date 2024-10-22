@@ -1,7 +1,7 @@
 package gr.georpavl.jwtAuth.api.security.filters;
 
-import gr.georpavl.jwtAuth.api.domain.tokens.repositories.TokenJpaRepository;
 import gr.georpavl.jwtAuth.api.security.services.JwtService;
+import io.jsonwebtoken.ClaimJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,7 +25,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
   private final JwtService jwtService;
   private final UserDetailsService userDetailsService;
-  private final TokenJpaRepository tokenJpaRepository;
 
   @Override
   protected void doFilterInternal(
@@ -34,60 +33,51 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       @NonNull FilterChain filterChain)
       throws ServletException, IOException {
 
-    if (isAuthEndpoint(request)) {
-      filterChain.doFilter(request, response);
+    try {
+      var jwt = extractJwtFromRequest(request);
+      if (isJwtValidForAuthentication(jwt)) {
+        authenticateRequest(jwt, request);
+      }
+    } catch (ClaimJwtException e) {
+      handleJwtException(response, e);
       return;
-    }
-
-    final String jwt = extractJwtFromRequest(request);
-    if (jwt == null) {
-      filterChain.doFilter(request, response);
-      return;
-    }
-
-    final String userEmail = jwtService.extractUsername(jwt);
-    if (userEmail == null || isUserAlreadyAuthenticated()) {
-      filterChain.doFilter(request, response);
-      return;
-    }
-
-    UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
-    if (isTokenValid(jwt, userDetails)) {
-      setAuthentication(userDetails, request);
     }
 
     filterChain.doFilter(request, response);
   }
 
-  private boolean isAuthEndpoint(HttpServletRequest request) {
-    return request.getServletPath().contains("/api/v1/auth");
-  }
-
   private String extractJwtFromRequest(HttpServletRequest request) {
-    final String authHeader = request.getHeader("Authorization");
+    final var authHeader = request.getHeader("Authorization");
     if (authHeader == null || !authHeader.startsWith("Bearer ")) {
       return null;
     }
     return authHeader.substring(7);
   }
 
-  private boolean isUserAlreadyAuthenticated() {
-    return SecurityContextHolder.getContext().getAuthentication() != null;
+  private boolean isJwtValidForAuthentication(String jwt) {
+    return jwt != null && SecurityContextHolder.getContext().getAuthentication() == null;
   }
 
-  private boolean isTokenValid(String jwt, UserDetails userDetails) {
-    boolean tokenExistsAndValid =
-        tokenJpaRepository
-            .findByValue(jwt)
-            .map(t -> !t.isExpired() && !t.isRevoked())
-            .orElse(false);
-    return jwtService.isTokenValid(jwt, userDetails) && tokenExistsAndValid;
+  private void authenticateRequest(String jwt, HttpServletRequest request) {
+    var username = jwtService.extractUsername(jwt);
+    if (username != null) {
+      var userDetails = userDetailsService.loadUserByUsername(username);
+      if (jwtService.isTokenValid(jwt, userDetails)) {
+        setAuthentication(userDetails, request);
+      }
+    }
   }
 
   private void setAuthentication(UserDetails userDetails, HttpServletRequest request) {
-    UsernamePasswordAuthenticationToken authToken =
+    var authToken =
         new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
     SecurityContextHolder.getContext().setAuthentication(authToken);
+  }
+
+  private void handleJwtException(HttpServletResponse response, ClaimJwtException e)
+      throws IOException {
+    log.error("Expired JWT token: {}", e.getMessage());
+    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "JWT token has expired");
   }
 }

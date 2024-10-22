@@ -83,7 +83,7 @@ public class JwtService {
         .getBody();
   }
 
-  private Key getSignInKey() {
+  public Key getSignInKey() {
     var keyBytes = Decoders.BASE64.decode(secretKey);
     return Keys.hmacShaKeyFor(keyBytes);
   }
