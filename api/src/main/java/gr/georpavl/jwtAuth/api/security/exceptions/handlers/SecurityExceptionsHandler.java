@@ -17,18 +17,19 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class SecurityExceptionsHandler {
 
   @ExceptionHandler({NoPermissionException.class})
-  @ResponseStatus(HttpStatus.UNAUTHORIZED)
-  public ResponseEntity<CustomErrorResponse> handleException(NoPermissionException exception) {
+  @ResponseStatus(HttpStatus.FORBIDDEN)
+  public ResponseEntity<CustomErrorResponse> handleNoPermissionException(
+      NoPermissionException exception) {
     log.error("No permission error: {}", exception.getMessage(), exception);
-    var errorDetails = List.of(new ErrorDetails(HttpStatus.UNAUTHORIZED, exception.getMessage()));
+    var errorDetails = List.of(new ErrorDetails(HttpStatus.FORBIDDEN, exception.getMessage()));
 
-    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-        .body(new CustomErrorResponse(errorDetails));
+    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new CustomErrorResponse(errorDetails));
   }
 
   @ExceptionHandler(UnauthorizedAccessException.class)
   @ResponseStatus(HttpStatus.UNAUTHORIZED)
-  public ResponseEntity<CustomErrorResponse> handleOtherException(UnauthorizedAccessException ex) {
+  public ResponseEntity<CustomErrorResponse> handleUnauthorizedAccessException(
+      UnauthorizedAccessException ex) {
     log.error("Unauthorized access error: {}", ex.getMessage(), ex);
     var errorDetails = List.of(new ErrorDetails(HttpStatus.UNAUTHORIZED, ex.getMessage()));
 

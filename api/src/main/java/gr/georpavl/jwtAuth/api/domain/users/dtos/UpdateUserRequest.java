@@ -20,7 +20,8 @@ public record UpdateUserRequest(
     @NotEmpty(message = "'Last Name' is required.")
         @Size(min = 3, message = "'Last Name must greater than {min} characters long.")
         String lastName,
-    String phoneNumber) {
+    @Size(min = 3, message = "'Last Name must greater than {min} characters long.")
+        String phoneNumber) {
 
   public static UpdateUserRequest of(
       String email, String firstName, String lastName, String phoneNumber) {

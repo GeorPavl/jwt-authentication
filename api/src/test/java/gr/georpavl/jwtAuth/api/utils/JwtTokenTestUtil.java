@@ -88,6 +88,9 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class JwtTokenTestUtil {
 
+  public static final String AUTHORIZATION_HEADER = "Authorization";
+  public static final String CONTENT_TYPE_JSON = "application/json";
+
   public static String createValidUserToken() {
     return createToken("user1@example.com", "USER", 3600000); // 1 hour validity
   }

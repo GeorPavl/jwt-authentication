@@ -1,6 +1,8 @@
 spring:
   config:
     import: "mail-config-development.yaml"
+  cache:
+    type: none
   jpa:
     hibernate:
       ddl-auto: none
@@ -9,6 +11,5 @@ spring:
     url: jdbc:postgresql://localhost:5433/jwt-auth-testing
     password: JwtAuthTest123!@#
   liquibase:
+    drop-first: true
     change-log: classpath:testDB/changelog-master.xml
-    enabled: true
-    clear-checksums: true

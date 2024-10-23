@@ -12,4 +12,8 @@ public class UserFixture {
     return UpdateUserRequest.of(
         "updatedEmail@example.com", "JohnUpdated", "DoeUpdated", "111111111");
   }
+
+  public static UpdateUserRequest createInvalidUpdateRequest() {
+    return UpdateUserRequest.of("example.com", "J", "D", "1");
+  }
 }

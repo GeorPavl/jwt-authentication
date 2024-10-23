@@ -4,7 +4,7 @@
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
-  <changeSet id="create-users-table" author="georpavl">
+  <changeSet id="create-users-table-test" author="georpavl">
     <createTable tableName="users">
       <column name="id" type="UUID">
         <constraints primaryKey="true" nullable="false" unique="true"/>
@@ -50,7 +50,7 @@
     </createTable>
   </changeSet>
 
-  <changeSet id="insert-data-in-users-table" author="georpavl">
+  <changeSet id="insert-data-in-users-table-test" author="georpavl">
     <insert tableName="users">
       <column name="id" value="1e02b0a0-7c92-11e8-adc0-fa7ae01bbebc"/>
       <column name="email" value="user1@example.com"/>
