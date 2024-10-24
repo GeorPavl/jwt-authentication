@@ -20,15 +20,15 @@ public class SecurityExceptionFactory {
 
   public static RuntimeException handleSecurityException(Exception e) {
     if (e instanceof AuthenticationException) {
-      return of((AuthenticationException) e);
+      return handle((AuthenticationException) e);
     } else if (e instanceof AccessDeniedException) {
-      return of((AccessDeniedException) e);
+      return handle((AccessDeniedException) e);
     } else {
       return e instanceof RuntimeException ? (RuntimeException) e : new RuntimeException(e);
     }
   }
 
-  public static RuntimeException of(AuthenticationException e) {
+  public static RuntimeException handle(AuthenticationException e) {
     if (e instanceof BadCredentialsException) {
       return new UnauthorizedAccessException("Invalid credentials provided.");
     } else if (e instanceof UsernameNotFoundException) {
@@ -50,7 +50,7 @@ public class SecurityExceptionFactory {
     }
   }
 
-  public static RuntimeException of(AccessDeniedException e) {
+  public static RuntimeException handle(AccessDeniedException e) {
     if (e instanceof AuthorizationServiceException) {
       return new NoPermissionException("Authorization service encountered an error.");
     } else if (e.getMessage().contains("denyAll")) {

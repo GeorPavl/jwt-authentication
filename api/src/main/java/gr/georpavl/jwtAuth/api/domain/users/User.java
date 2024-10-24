@@ -55,7 +55,7 @@ public class User {
   @Size(min = 3, message = "'Last Name must greater than {min} characters long.")
   private String lastName;
 
-  @Column(name = "phone_number")
+  @Column(name = "phone_number", unique = true)
   private String phoneNumber;
 
   @NotEmpty(message = "'Password' is required.")

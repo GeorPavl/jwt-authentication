@@ -6,10 +6,8 @@ import gr.georpavl.jwtAuth.api.domain.users.User;
 import gr.georpavl.jwtAuth.api.domain.users.mappers.UserMapper;
 import gr.georpavl.jwtAuth.api.domain.users.repositories.UserJpaRepository;
 import gr.georpavl.jwtAuth.api.security.exceptions.handlers.SecurityExceptionFactory;
-import gr.georpavl.jwtAuth.api.security.exceptions.implementations.UserAlreadyRegisteredException;
 import gr.georpavl.jwtAuth.api.utils.exceptions.handlers.SqlExceptionUtilsFactory;
 import gr.georpavl.jwtAuth.api.utils.exceptions.implementations.PasswordMissMatchException;
-import gr.georpavl.jwtAuth.api.utils.exceptions.implementations.ResourceAlreadyPresentException;
 import gr.georpavl.jwtAuth.api.utils.mailService.MailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +33,7 @@ public class RegistrationServiceImpl implements RegistrationService {
       return authorizationTokensManagementService.generateTokensAndReturnAuthenticationResponse(
           user);
     } catch (RuntimeException e) {
-      throw handleRegistrationException(request.email(), e);
+      throw handleRegistrationException(e);
     }
   }
 
@@ -53,15 +51,10 @@ public class RegistrationServiceImpl implements RegistrationService {
     mailService.sendVerificationEmail(user.getEmail(), user.getToken(), user.getCode());
   }
 
-  private RuntimeException handleRegistrationException(String email, RuntimeException e) {
+  private RuntimeException handleRegistrationException(RuntimeException e) {
     if (e instanceof DataIntegrityViolationException) {
-      var translatedException = SqlExceptionUtilsFactory.of((DataIntegrityViolationException) e);
-      if (translatedException instanceof ResourceAlreadyPresentException) {
-        return new UserAlreadyRegisteredException(email);
-      }
-      return translatedException;
+      return SqlExceptionUtilsFactory.handle((DataIntegrityViolationException) e);
     }
-
     return SecurityExceptionFactory.handleSecurityException(e);
   }
 }

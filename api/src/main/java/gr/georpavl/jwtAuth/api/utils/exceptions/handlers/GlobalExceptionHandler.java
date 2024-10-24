@@ -77,7 +77,7 @@ public class GlobalExceptionHandler {
   @ResponseStatus(HttpStatus.CONFLICT)
   public ResponseEntity<CustomErrorResponse> handleDataIntegrityViolationException(
       DataIntegrityViolationException e) {
-    var translatedException = SqlExceptionUtilsFactory.of(e);
+    var translatedException = SqlExceptionUtilsFactory.handle(e);
     log.error("Data integrity violation: {}", translatedException.getMessage(), e);
     var errorDetails =
         List.of(new ErrorDetails(HttpStatus.CONFLICT, extractErrorMessage(translatedException)));

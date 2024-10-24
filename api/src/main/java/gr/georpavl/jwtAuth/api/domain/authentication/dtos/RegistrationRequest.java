@@ -17,25 +17,35 @@ public record RegistrationRequest(
             message = "'Email' must be between {min} and {max} characters long.")
         @Email(message = "You have to provide a valid email address.")
         String email,
-    @NotEmpty(message = "'Last Name' is required.")
+    @NotEmpty(message = "'First Name' is required.")
         @Size(min = 3, message = "'First Name must greater than {min} characters long.")
         String firstName,
     @NotEmpty(message = "'Last Name' is required.")
         @Size(min = 3, message = "'Last Name must greater than {min} characters long.")
         String lastName,
-    String phoneNumber,
-    @NotEmpty(message = "'Password' is required.")
-        @Size(
-            min = 8,
-            max = 120,
-            message = "Password should be between {min} and {max} characters long.")
-        @ValidPassword
-        String password,
-    @NotEmpty(message = "'Confirmation Password' is required.")
-        @Size(
-            min = 8,
-            max = 120,
-            message = "Confirmation password should be between {min} and {max} characters long.")
-        @ValidPassword
-        String confirmationPassword,
-    @NotNull(message = "'Role' is required.") Role role) {}
+    @NotEmpty(message = "'Last Name' is required.")
+        @Size(min = 3, message = "'Phone Number' must greater than {min} characters long.")
+        String phoneNumber,
+    @ValidPassword String password,
+    @ValidPassword String confirmationPassword,
+    @NotNull(message = "'Role' is required.") Role role) {
+
+  public static RegistrationRequest of(
+      String email,
+      String firstName,
+      String lastName,
+      String phoneNumber,
+      String password,
+      String confirmationPassword,
+      Role role) {
+    return RegistrationRequest.builder()
+        .email(email)
+        .firstName(firstName)
+        .lastName(lastName)
+        .phoneNumber(phoneNumber)
+        .password(password)
+        .confirmationPassword(confirmationPassword)
+        .role(role)
+        .build();
+  }
+}

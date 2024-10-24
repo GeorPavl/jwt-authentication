@@ -28,7 +28,8 @@ public class UserUtilsService {
 
   public void checkIfUserIsAdminOrAccountOwner(UUID userId) {
     if (!isLoggedUserAccountOwner(userId) && !isLoggedUserAdmin()) {
-      throw SecurityExceptionFactory.of(new AccessDeniedException("The user lacks permissions."));
+      throw SecurityExceptionFactory.handle(
+          new AccessDeniedException("The user lacks permissions."));
     }
   }
 

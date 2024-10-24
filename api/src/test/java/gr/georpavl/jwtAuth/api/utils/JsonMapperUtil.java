@@ -21,8 +21,7 @@ public class JsonMapperUtil {
     return objectMapper.readValue(jsonString, classToConvert);
   }
 
-  public <T> List<T> convertJsonToListOfObjects(String jsonString)
-      throws Exception {
+  public <T> List<T> convertJsonToListOfObjects(String jsonString) throws Exception {
     return objectMapper.readValue(jsonString, new TypeReference<>() {});
   }
 }

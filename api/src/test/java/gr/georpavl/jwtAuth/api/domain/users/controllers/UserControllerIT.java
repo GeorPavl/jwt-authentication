@@ -24,16 +24,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Slf4j
 @ActiveProfiles("test")
-@Transactional
+@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
+@Slf4j
 class UserControllerIT {
 
   private final String USER_URL_V1 = "/api/v1/users";
@@ -62,12 +63,12 @@ class UserControllerIT {
 
   @Test
   void getById_shouldReturnUserSuccessfully() throws Exception {
-    final var URL = USER_URL_V1 + "/" + USER1_ID;
+    final var url = USER_URL_V1 + "/" + USER1_ID;
 
     var resultAsString =
         mockMvc
             .perform(
-                MockMvcRequestBuilders.get(URL)
+                MockMvcRequestBuilders.get(url)
                     .header(AUTHORIZATION_HEADER, JwtTokenTestUtil.createValidUserToken()))
             .andExpect(status().isOk())
             .andReturn()
@@ -81,12 +82,12 @@ class UserControllerIT {
 
   @Test
   void getById_shouldReturnExceptionForInvalidId() throws Exception {
-    final var URL = USER_URL_V1 + "/" + UUID.randomUUID();
+    final var url = USER_URL_V1 + "/" + UUID.randomUUID();
 
     var resultAsString =
         mockMvc
             .perform(
-                MockMvcRequestBuilders.get(URL)
+                MockMvcRequestBuilders.get(url)
                     .header(AUTHORIZATION_HEADER, JwtTokenTestUtil.createValidUserToken()))
             .andExpect(status().isNotFound())
             .andReturn()
@@ -100,11 +101,11 @@ class UserControllerIT {
 
   @Test
   void getById_shouldReturnExceptionForExpiredToken() throws Exception {
-    final var URL = USER_URL_V1 + "/" + USER1_ID;
+    final var url = USER_URL_V1 + "/" + USER1_ID;
 
     mockMvc
         .perform(
-            MockMvcRequestBuilders.get(URL)
+            MockMvcRequestBuilders.get(url)
                 .header(AUTHORIZATION_HEADER, JwtTokenTestUtil.createInvalidToken()))
         .andExpect(status().isUnauthorized());
 
@@ -113,14 +114,14 @@ class UserControllerIT {
 
   @Test
   void updateUser_shouldUpdateUserSuccessfully() throws Exception {
-    final var URL = USER_URL_V1 + "/" + USER1_ID;
+    final var url = USER_URL_V1 + "/" + USER1_ID;
     var updateRequest = UserFixture.createUpdateRequest();
     var requestBody = jsonMapperUtil.convertToJsonString(updateRequest);
 
     var resultAsString =
         mockMvc
             .perform(
-                MockMvcRequestBuilders.patch(URL)
+                MockMvcRequestBuilders.patch(url)
                     .header(AUTHORIZATION_HEADER, JwtTokenTestUtil.createValidUserToken())
                     .contentType(CONTENT_TYPE_JSON)
                     .content(requestBody))
@@ -140,14 +141,14 @@ class UserControllerIT {
 
   @Test
   void updateUser_shouldUpdateUserSuccessfullyByAdmin() throws Exception {
-    final var URL = USER_URL_V1 + "/" + USER1_ID;
+    final var url = USER_URL_V1 + "/" + USER1_ID;
     var updateRequest = UserFixture.createUpdateRequest();
     var requestBody = jsonMapperUtil.convertToJsonString(updateRequest);
 
     var resultAsString =
         mockMvc
             .perform(
-                MockMvcRequestBuilders.patch(URL)
+                MockMvcRequestBuilders.patch(url)
                     .header(AUTHORIZATION_HEADER, JwtTokenTestUtil.createValidAdminToken())
                     .contentType(CONTENT_TYPE_JSON)
                     .content(requestBody))
@@ -167,13 +168,13 @@ class UserControllerIT {
 
   @Test
   void updateUser_shouldThrowExceptionForInvalidId() throws Exception {
-    final var URL = USER_URL_V1 + "/" + UUID.randomUUID();
+    final var url = USER_URL_V1 + "/" + UUID.randomUUID();
     var updateRequest = UserFixture.createUpdateRequest();
     var requestBody = jsonMapperUtil.convertToJsonString(updateRequest);
     var resultAsString =
         mockMvc
             .perform(
-                MockMvcRequestBuilders.patch(URL)
+                MockMvcRequestBuilders.patch(url)
                     .header(AUTHORIZATION_HEADER, JwtTokenTestUtil.createValidUserToken())
                     .contentType(CONTENT_TYPE_JSON)
                     .content(requestBody))
@@ -191,13 +192,13 @@ class UserControllerIT {
 
   @Test
   void updateUser_shouldThrowExceptionForInvalidRequest() throws Exception {
-    final var URL = USER_URL_V1 + "/" + USER1_UUID;
+    final var url = USER_URL_V1 + "/" + USER1_UUID;
     var updateRequest = UserFixture.createInvalidUpdateRequest();
     var requestBody = jsonMapperUtil.convertToJsonString(updateRequest);
     var resultAsString =
         mockMvc
             .perform(
-                MockMvcRequestBuilders.patch(URL)
+                MockMvcRequestBuilders.patch(url)
                     .header(AUTHORIZATION_HEADER, JwtTokenTestUtil.createValidUserToken())
                     .contentType(CONTENT_TYPE_JSON)
                     .content(requestBody))
@@ -215,10 +216,10 @@ class UserControllerIT {
 
   @Test
   void deleteUser_shouldDeleteUserSuccessfully() throws Exception {
-    final var URL = USER_URL_V1 + "/" + USER1_UUID;
+    final var url = USER_URL_V1 + "/" + USER1_UUID;
     mockMvc
         .perform(
-            MockMvcRequestBuilders.delete(URL)
+            MockMvcRequestBuilders.delete(url)
                 .header(AUTHORIZATION_HEADER, JwtTokenTestUtil.createValidAdminToken()))
         .andExpect(status().isNoContent());
 
@@ -227,10 +228,10 @@ class UserControllerIT {
 
   @Test
   void deleteUser_shouldThrowExceptionForInvalidPermissionIfUserNotAdmin() throws Exception {
-    final var URL = USER_URL_V1 + "/" + USER1_UUID;
+    final var url = USER_URL_V1 + "/" + USER1_UUID;
     mockMvc
         .perform(
-            MockMvcRequestBuilders.delete(URL)
+            MockMvcRequestBuilders.delete(url)
                 .header(AUTHORIZATION_HEADER, JwtTokenTestUtil.createValidUserToken()))
         .andExpect(status().isForbidden());
 

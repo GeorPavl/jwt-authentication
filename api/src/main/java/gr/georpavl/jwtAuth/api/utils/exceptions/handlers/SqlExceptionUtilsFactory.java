@@ -1,5 +1,6 @@
 package gr.georpavl.jwtAuth.api.utils.exceptions.handlers;
 
+import gr.georpavl.jwtAuth.api.security.exceptions.implementations.UserAlreadyRegisteredException;
 import gr.georpavl.jwtAuth.api.utils.exceptions.implementations.ResourceAlreadyPresentException;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -24,45 +25,82 @@ public class SqlExceptionUtilsFactory {
     initializeExceptionMappings();
   }
 
-  public static RuntimeException of(DataIntegrityViolationException e) {
-    var rootCause = e.getRootCause();
+  /**
+   * Processes a DataIntegrityViolationException and returns a more specific exception based on SQL
+   * state codes.
+   *
+   * @param exception The DataIntegrityViolationException to process.
+   * @return A specific exception based on the SQL state code.
+   */
+  public static RuntimeException handle(DataIntegrityViolationException exception) {
+    var rootCause = exception.getRootCause();
 
     if (rootCause instanceof SQLException sqlException) {
       var sqlState = sqlException.getSQLState();
-      if (exceptionMapping.containsKey(sqlState)) {
-        return exceptionMapping.get(sqlState);
-      } else {
-        return new DataIntegrityViolationException("Unhandled data integrity violation.", e);
+
+      if (isUniqueConstraintViolation(sqlState)) {
+        return handleUniqueConstraintViolation(sqlException);
       }
-    } else {
-      return new DataIntegrityViolationException("Unknown data integrity violation.", e);
+
+      return getMappedException(sqlState, exception);
     }
+
+    return new DataIntegrityViolationException("Unknown data integrity violation.", exception);
+  }
+
+  private static boolean isUniqueConstraintViolation(String sqlState) {
+    return UNIQUE_CONSTRAINT_CODE.equals(sqlState);
+  }
+
+  private static RuntimeException handleUniqueConstraintViolation(SQLException sqlException) {
+    var field = extractDuplicateField(sqlException);
+
+    if ("email".equalsIgnoreCase(field)) {
+      return new UserAlreadyRegisteredException("User '" + field + "' is already registered.");
+    }
+
+    return new ResourceAlreadyPresentException("Duplicate entry for field: " + field);
+  }
+
+  private static RuntimeException getMappedException(
+      String sqlState, DataIntegrityViolationException exception) {
+    return exceptionMapping.getOrDefault(
+        sqlState,
+        new DataIntegrityViolationException("Unhandled data integrity violation.", exception));
   }
 
   private static void initializeExceptionMappings() {
-    addExceptionMapping(
-        UNIQUE_CONSTRAINT_CODE,
-        new ResourceAlreadyPresentException("Unique constraint violation."));
-    addExceptionMapping(
+    exceptionMapping.put(
         FK_CONSTRAINT_CODE,
         new DataIntegrityViolationException("Foreign key constraint violation."));
-    addExceptionMapping(
+    exceptionMapping.put(
         NOT_NULL_VIOLATION_CODE,
         new DataIntegrityViolationException("Not null constraint violation."));
-    addExceptionMapping(
+    exceptionMapping.put(
         CHECK_CONSTRAINT_VIOLATION_CODE,
         new DataIntegrityViolationException("Check constraint violation."));
-    addExceptionMapping(
+    exceptionMapping.put(
         STRING_DATA_TRUNCATION_CODE,
         new DataIntegrityViolationException("String data right truncation."));
-    addExceptionMapping(
+    exceptionMapping.put(
         INVALID_DATE_FORMAT_CODE, new DataIntegrityViolationException("Invalid date format."));
-    addExceptionMapping(
+    exceptionMapping.put(
         NUMERIC_VALUE_OUT_OF_RANGE_CODE,
         new DataIntegrityViolationException("Numeric value out of range."));
   }
 
-  public static void addExceptionMapping(String sqlStateCode, RuntimeException exception) {
-    exceptionMapping.put(sqlStateCode, exception);
+  public static String extractDuplicateField(SQLException exception) {
+    var message = exception.getMessage();
+
+    if (message != null && message.contains("Key (")) {
+      var startIndex = message.indexOf("Key (") + 5;
+      var endIndex = message.indexOf(")", startIndex);
+
+      if (startIndex > 0 && endIndex > 0) {
+        return message.substring(startIndex, endIndex);
+      }
+    }
+
+    return "Unknown field";
   }
 }

@@ -25,7 +25,7 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
       HttpServletResponse response,
       AccessDeniedException accessDeniedException)
       throws IOException {
-    var translatedException = SecurityExceptionFactory.of(accessDeniedException);
+    var translatedException = SecurityExceptionFactory.handle(accessDeniedException);
     response.setStatus(HttpServletResponse.SC_FORBIDDEN);
     response.setContentType("application/json");
 
