@@ -6,7 +6,6 @@ import gr.georpavl.jwtAuth.api.domain.users.services.UserService;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
-import javax.naming.NoPermissionException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -42,8 +41,7 @@ public class UserController {
 
   @PatchMapping("/{userId}")
   public ResponseEntity<UserResponse> updateUser(
-      @PathVariable("userId") UUID userId, @RequestBody @Valid UpdateUserRequest request)
-      throws NoPermissionException {
+      @PathVariable("userId") UUID userId, @RequestBody @Valid UpdateUserRequest request) {
     var result = userService.updateUser(userId, request);
     log.info("User updated successfully");
     return ResponseEntity.accepted().body(result);

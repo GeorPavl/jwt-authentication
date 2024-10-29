@@ -178,6 +178,31 @@ class UserControllerIT {
                     .header(AUTHORIZATION_HEADER, JwtTokenTestUtil.createValidUserToken())
                     .contentType(CONTENT_TYPE_JSON)
                     .content(requestBody))
+            .andExpect(status().isNotFound())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+
+    var result = jsonMapperUtil.convertJsonToObject(resultAsString, CustomErrorResponse.class);
+
+    assertEquals(1, result.getErrors().size());
+    verify(userUtilsService, times(0)).checkIfUserIsAdminOrAccountOwner(any(UUID.class));
+    verify(userService, times(0)).getUserById(any(UUID.class));
+  }
+
+  @Test
+  void updateUser_shouldThrowExceptionForInvalidPermission() throws Exception {
+    final var adminId = UUID.fromString("1e02b0a0-7c92-11e8-adc0-fa7ae01bbebd");
+    final var url = USER_URL_V1 + "/" + adminId;
+    var updateRequest = UserFixture.createUpdateRequest();
+    var requestBody = jsonMapperUtil.convertToJsonString(updateRequest);
+    var resultAsString =
+        mockMvc
+            .perform(
+                MockMvcRequestBuilders.patch(url)
+                    .header(AUTHORIZATION_HEADER, JwtTokenTestUtil.createValidUserToken())
+                    .contentType(CONTENT_TYPE_JSON)
+                    .content(requestBody))
             .andExpect(status().isForbidden())
             .andReturn()
             .getResponse()
@@ -222,6 +247,18 @@ class UserControllerIT {
             MockMvcRequestBuilders.delete(url)
                 .header(AUTHORIZATION_HEADER, JwtTokenTestUtil.createValidAdminToken()))
         .andExpect(status().isNoContent());
+
+    verify(userService, times(1)).deleteUser(any(UUID.class));
+  }
+
+  @Test
+  void deleteUser_shouldThrowExceptionForInvalidId() throws Exception {
+    final var url = USER_URL_V1 + "/" + UUID.randomUUID();
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.delete(url)
+                .header(AUTHORIZATION_HEADER, JwtTokenTestUtil.createValidAdminToken()))
+        .andExpect(status().isNotFound());
 
     verify(userService, times(1)).deleteUser(any(UUID.class));
   }

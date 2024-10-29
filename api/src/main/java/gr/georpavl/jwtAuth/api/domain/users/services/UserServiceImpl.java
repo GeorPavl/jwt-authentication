@@ -9,7 +9,6 @@ import gr.georpavl.jwtAuth.api.utils.exceptions.implementations.ResourceNotFound
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import javax.naming.NoPermissionException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -45,9 +44,7 @@ public class UserServiceImpl implements UserService {
 
   @Transactional
   @Override
-  public UserResponse updateUser(UUID userId, UpdateUserRequest request)
-      throws NoPermissionException {
-    userUtilsService.checkIfUserIsAdminOrAccountOwner(userId);
+  public UserResponse updateUser(UUID userId, UpdateUserRequest request) {
     var user =
         userJpaRepository
             .findById(userId)
@@ -55,6 +52,7 @@ public class UserServiceImpl implements UserService {
                 () ->
                     new ResourceNotFoundException(
                         User.class.getSimpleName(), "ID", userId.toString()));
+    userUtilsService.checkIfUserIsAdminOrAccountOwner(userId);
     var userToUpdate = userMapper.toEntity(user, request);
     var savedUser = userJpaRepository.save(userToUpdate);
     return userMapper.toResponse(savedUser);
@@ -62,6 +60,7 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public void deleteUser(UUID userId) {
+    getUserById(userId);
     userJpaRepository.deleteById(userId);
   }
 }
