@@ -1,4 +1,4 @@
-package gr.georpavl.jwtAuth.api.domain.users.services;
+package gr.georpavl.jwtAuth.api.security.services;
 
 import gr.georpavl.jwtAuth.api.domain.users.Role;
 import gr.georpavl.jwtAuth.api.security.exceptions.handlers.SecurityExceptionFactory;
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class UserUtilsService {
+public class AuthenticatedUserUtilService {
 
   public UserDetailsImpl getLoggedInUser() {
     var authentication = SecurityContextHolder.getContext().getAuthentication();

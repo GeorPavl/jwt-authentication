@@ -23,6 +23,7 @@ import gr.georpavl.jwtAuth.api.domain.users.dtos.UserResponse;
 import gr.georpavl.jwtAuth.api.domain.users.mappers.UserMapper;
 import gr.georpavl.jwtAuth.api.domain.users.repositories.UserJpaRepository;
 import gr.georpavl.jwtAuth.api.security.exceptions.implementations.NoPermissionException;
+import gr.georpavl.jwtAuth.api.security.services.AuthenticatedUserUtilService;
 import gr.georpavl.jwtAuth.api.utils.exceptions.implementations.ResourceNotFoundException;
 import java.util.List;
 import java.util.Optional;
@@ -41,7 +42,7 @@ class UserServiceImplTest {
   @InjectMocks private UserServiceImpl userService;
   @Mock private UserJpaRepository userJpaRepository;
   @Mock private UserMapper userMapper;
-  @Mock private UserUtilsService userUtilsService;
+  @Mock private AuthenticatedUserUtilService authenticatedUserUtilService;
 
   public static final UpdateUserRequest UPDATE_USER_REQUEST = UserFixture.createUpdateRequest();
   public static final User TEST_USER = UserFixture.createTestUser();
@@ -92,7 +93,7 @@ class UserServiceImplTest {
 
   @Test
   void updateUser_shouldUpdateUserSuccessfully() {
-    doNothing().when(userUtilsService).checkIfUserIsAdminOrAccountOwner(UUID_DEADBEEF);
+    doNothing().when(authenticatedUserUtilService).checkIfUserIsAdminOrAccountOwner(UUID_DEADBEEF);
     when(userJpaRepository.findById(UUID_DEADBEEF)).thenReturn(Optional.of(TEST_USER));
     when(userMapper.toEntity(any(User.class), any(UpdateUserRequest.class)))
         .thenReturn(UPDATED_USER);
@@ -108,7 +109,8 @@ class UserServiceImplTest {
     assertEquals(UPDATED_LAST_NAME, result.lastName());
     assertEquals(UPDATED_PHONE_NUMBER, result.phoneNumber());
     verify(userJpaRepository, times(1)).findById(any(UUID.class));
-    verify(userUtilsService, times(1)).checkIfUserIsAdminOrAccountOwner(any(UUID.class));
+    verify(authenticatedUserUtilService, times(1))
+        .checkIfUserIsAdminOrAccountOwner(any(UUID.class));
     verify(userMapper, times(1)).toEntity(any(User.class), any(UpdateUserRequest.class));
     verify(userJpaRepository, times(1)).save(any(User.class));
     verify(userMapper, times(1)).toResponse(any(User.class));
@@ -131,13 +133,14 @@ class UserServiceImplTest {
   void updateUser_shouldThrowExceptionIfUserIsNotAdminOrAccountOwner() {
     when(userJpaRepository.findById(UUID_DEADBEEF)).thenReturn(Optional.of(TEST_USER));
     doThrow(NoPermissionException.class)
-        .when(userUtilsService)
+        .when(authenticatedUserUtilService)
         .checkIfUserIsAdminOrAccountOwner(UUID_DEADBEEF);
 
     assertThrows(
         NoPermissionException.class,
         () -> userService.updateUser(UUID_DEADBEEF, UPDATE_USER_REQUEST));
-    verify(userUtilsService, times(1)).checkIfUserIsAdminOrAccountOwner(any(UUID.class));
+    verify(authenticatedUserUtilService, times(1))
+        .checkIfUserIsAdminOrAccountOwner(any(UUID.class));
     verify(userJpaRepository, times(1)).findById(any(UUID.class));
     verify(userMapper, times(0)).toEntity(any(User.class), any(UpdateUserRequest.class));
     verify(userJpaRepository, times(0)).save(any(User.class));

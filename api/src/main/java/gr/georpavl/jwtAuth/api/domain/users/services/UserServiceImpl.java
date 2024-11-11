@@ -5,6 +5,7 @@ import gr.georpavl.jwtAuth.api.domain.users.dtos.UpdateUserRequest;
 import gr.georpavl.jwtAuth.api.domain.users.dtos.UserResponse;
 import gr.georpavl.jwtAuth.api.domain.users.mappers.UserMapper;
 import gr.georpavl.jwtAuth.api.domain.users.repositories.UserJpaRepository;
+import gr.georpavl.jwtAuth.api.security.services.AuthenticatedUserUtilService;
 import gr.georpavl.jwtAuth.api.utils.exceptions.implementations.ResourceNotFoundException;
 import java.util.List;
 import java.util.UUID;
@@ -21,7 +22,7 @@ public class UserServiceImpl implements UserService {
 
   private final UserJpaRepository userJpaRepository;
   private final UserMapper userMapper;
-  private final UserUtilsService userUtilsService;
+  private final AuthenticatedUserUtilService authenticatedUserUtilService;
 
   @Override
   public List<UserResponse> getAllUsers() {
@@ -52,7 +53,7 @@ public class UserServiceImpl implements UserService {
                 () ->
                     new ResourceNotFoundException(
                         User.class.getSimpleName(), "ID", userId.toString()));
-    userUtilsService.checkIfUserIsAdminOrAccountOwner(userId);
+    authenticatedUserUtilService.checkIfUserIsAdminOrAccountOwner(userId);
     var userToUpdate = userMapper.toEntity(user, request);
     var savedUser = userJpaRepository.save(userToUpdate);
     return userMapper.toResponse(savedUser);

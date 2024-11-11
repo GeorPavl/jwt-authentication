@@ -13,7 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import gr.georpavl.jwtAuth.api.domain.users.dtos.UpdateUserRequest;
 import gr.georpavl.jwtAuth.api.domain.users.dtos.UserResponse;
 import gr.georpavl.jwtAuth.api.domain.users.services.UserService;
-import gr.georpavl.jwtAuth.api.domain.users.services.UserUtilsService;
+import gr.georpavl.jwtAuth.api.security.services.AuthenticatedUserUtilService;
 import gr.georpavl.jwtAuth.api.utils.JsonMapperUtil;
 import gr.georpavl.jwtAuth.api.utils.JwtTokenTestUtil;
 import gr.georpavl.jwtAuth.api.utils.exceptions.CustomErrorResponse;
@@ -42,7 +42,7 @@ class UserControllerIT {
   @Autowired private MockMvc mockMvc;
   @Autowired private JsonMapperUtil jsonMapperUtil;
   @SpyBean private UserService userService;
-  @SpyBean private UserUtilsService userUtilsService;
+  @SpyBean private AuthenticatedUserUtilService authenticatedUserUtilService;
 
   @Test
   void getAll_shouldReturnAllUsersSuccessfully() throws Exception {
@@ -186,7 +186,8 @@ class UserControllerIT {
     var result = jsonMapperUtil.convertJsonToObject(resultAsString, CustomErrorResponse.class);
 
     assertEquals(1, result.getErrors().size());
-    verify(userUtilsService, times(0)).checkIfUserIsAdminOrAccountOwner(any(UUID.class));
+    verify(authenticatedUserUtilService, times(0))
+        .checkIfUserIsAdminOrAccountOwner(any(UUID.class));
     verify(userService, times(0)).getUserById(any(UUID.class));
   }
 
@@ -211,7 +212,8 @@ class UserControllerIT {
     var result = jsonMapperUtil.convertJsonToObject(resultAsString, CustomErrorResponse.class);
 
     assertEquals(1, result.getErrors().size());
-    verify(userUtilsService, times(1)).checkIfUserIsAdminOrAccountOwner(any(UUID.class));
+    verify(authenticatedUserUtilService, times(1))
+        .checkIfUserIsAdminOrAccountOwner(any(UUID.class));
     verify(userService, times(0)).getUserById(any(UUID.class));
   }
 
@@ -235,7 +237,8 @@ class UserControllerIT {
     var result = jsonMapperUtil.convertJsonToObject(resultAsString, CustomErrorResponse.class);
 
     assertEquals(4, result.getErrors().size());
-    verify(userUtilsService, times(0)).checkIfUserIsAdminOrAccountOwner(any(UUID.class));
+    verify(authenticatedUserUtilService, times(0))
+        .checkIfUserIsAdminOrAccountOwner(any(UUID.class));
     verify(userService, times(0)).getUserById(any(UUID.class));
   }
 

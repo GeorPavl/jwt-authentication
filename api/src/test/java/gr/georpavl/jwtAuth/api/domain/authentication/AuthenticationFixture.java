@@ -1,8 +1,10 @@
-package gr.georpavl.jwtAuth.api.domain.authentication.controllers;
+package gr.georpavl.jwtAuth.api.domain.authentication;
 
 import gr.georpavl.jwtAuth.api.domain.authentication.dtos.AuthenticationRequest;
+import gr.georpavl.jwtAuth.api.domain.authentication.dtos.AuthenticationResponse;
 import gr.georpavl.jwtAuth.api.domain.authentication.dtos.RegistrationRequest;
 import gr.georpavl.jwtAuth.api.domain.users.Role;
+import gr.georpavl.jwtAuth.api.domain.users.controllers.UserFixture;
 
 public class AuthenticationFixture {
 
@@ -90,5 +92,9 @@ public class AuthenticationFixture {
         NEW_USER_PASSWORD,
         NEW_USER_CONFIRMATION_PASSWORD,
         NEW_USER_ROLE);
+  }
+
+  public static AuthenticationResponse createAuthenticationResponse() {
+    return AuthenticationResponse.of(UserFixture.createTestUserResponse(), "", "");
   }
 }

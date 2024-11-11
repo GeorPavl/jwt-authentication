@@ -7,6 +7,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import gr.georpavl.jwtAuth.api.domain.authentication.AuthenticationFixture;
 import gr.georpavl.jwtAuth.api.domain.authentication.dtos.AuthenticationRequest;
 import gr.georpavl.jwtAuth.api.domain.authentication.dtos.AuthenticationResponse;
 import gr.georpavl.jwtAuth.api.domain.authentication.dtos.RegistrationRequest;
