@@ -28,6 +28,7 @@ public class SecurityConfiguration {
 
   private static final String API_V_1_USERS = "/api/v1/users/**";
   public static final String API_V_1_AUTH_LOGOUT = "/api/v1/auth/logout";
+  private static final String API_V_1_AUTH_CHANGE_PASSWORD = "/api/v1/auth/change-password";
 
   private final LogoutHandler logoutHandler;
   private final JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -74,7 +75,9 @@ public class SecurityConfiguration {
   private void configureAuthorization(HttpSecurity http) throws Exception {
     http.authorizeHttpRequests(
         req ->
-            req.requestMatchers(WhiteListURL.WHITE_LIST_URLS.toArray(new String[0]))
+            req.requestMatchers(API_V_1_AUTH_CHANGE_PASSWORD)
+                .authenticated()
+                .requestMatchers(WhiteListURL.WHITE_LIST_URLS.toArray(new String[0]))
                 .permitAll() // Allow public access to specific URLs
                 .requestMatchers(DELETE, API_V_1_USERS)
                 .hasAuthority(Role.ADMIN.name()) // Admin-only access to DELETE on user endpoints

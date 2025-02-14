@@ -2,6 +2,7 @@ package gr.georpavl.jwtAuth.api.domain.authentication.services;
 
 import gr.georpavl.jwtAuth.api.domain.authentication.dtos.AuthenticationRequest;
 import gr.georpavl.jwtAuth.api.domain.authentication.dtos.AuthenticationResponse;
+import gr.georpavl.jwtAuth.api.domain.authentication.dtos.ChangePasswordRequest;
 import gr.georpavl.jwtAuth.api.domain.authentication.dtos.RegistrationRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   private final VerificationService verificationService;
   private final LoginService loginService;
   private final AuthorizationTokensManagementService authorizationTokensManagementService;
+  private final ChangePasswordService changePasswordService;
 
   @Override
   public AuthenticationResponse login(AuthenticationRequest request) {
@@ -41,5 +43,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   @Override
   public AuthenticationResponse refreshToken(HttpServletRequest request) {
     return authorizationTokensManagementService.refreshToken(request);
+  }
+
+  @Override
+  public void changePassword(ChangePasswordRequest request) {
+    changePasswordService.changePassword(request);
   }
 }

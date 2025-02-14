@@ -2,11 +2,11 @@ package gr.georpavl.jwtAuth.api.utils.exceptions.handlers;
 
 import gr.georpavl.jwtAuth.api.utils.exceptions.CustomErrorResponse;
 import gr.georpavl.jwtAuth.api.utils.exceptions.ErrorDetails;
-import gr.georpavl.jwtAuth.api.utils.exceptions.implementations.PasswordMissMatchException;
-import gr.georpavl.jwtAuth.api.utils.exceptions.implementations.ResourceAlreadyPresentException;
-import gr.georpavl.jwtAuth.api.utils.exceptions.implementations.ResourceNotFoundException;
+import gr.georpavl.jwtAuth.api.utils.exceptions.implementations.*;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -82,6 +82,24 @@ public class GlobalExceptionHandler {
     var errorDetails =
         List.of(new ErrorDetails(HttpStatus.CONFLICT, extractErrorMessage(translatedException)));
     return ResponseEntity.status(HttpStatus.CONFLICT).body(new CustomErrorResponse(errorDetails));
+  }
+
+  @ExceptionHandler(SamePasswordException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ResponseEntity<CustomErrorResponse> handleSamePasswordException(
+      SamePasswordException e) {
+    log.error("Same password error: {}", e.getMessage());
+    var errorDetails = List.of(new ErrorDetails(HttpStatus.BAD_REQUEST, e.getMessage()));
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomErrorResponse(errorDetails));
+  }
+
+  @ExceptionHandler(ConfirmationPasswordException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ResponseEntity<CustomErrorResponse> handleConfirmationPasswordException(
+      ConfirmationPasswordException e) {
+    log.error("Confirmation password error: {}", e.getMessage());
+    var errorDetails = List.of(new ErrorDetails(HttpStatus.BAD_REQUEST, e.getMessage()));
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomErrorResponse(errorDetails));
   }
 
   private String extractErrorMessage(Exception e) {
