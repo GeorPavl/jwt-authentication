@@ -2,6 +2,7 @@ package gr.georpavl.jwtAuth.api.domain.authentication.controllers;
 
 import gr.georpavl.jwtAuth.api.domain.authentication.dtos.AuthenticationRequest;
 import gr.georpavl.jwtAuth.api.domain.authentication.dtos.AuthenticationResponse;
+import gr.georpavl.jwtAuth.api.domain.authentication.dtos.ChangePasswordRequest;
 import gr.georpavl.jwtAuth.api.domain.authentication.dtos.RegistrationRequest;
 import gr.georpavl.jwtAuth.api.domain.authentication.services.AuthenticationService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -60,6 +61,14 @@ public class AuthenticationController {
   public ResponseEntity<Void> resendVerificationEmail(@PathVariable("userEmail") String userEmail) {
     authenticationService.resendVerificationEmail(userEmail);
     log.info("Verification mail was sent successfully.");
+    return ResponseEntity.accepted().build();
+  }
+
+  @PatchMapping("/change-password")
+  public ResponseEntity<Void> changePassword(
+          @Valid @RequestBody ChangePasswordRequest request) {
+    authenticationService.changePassword(request);
+    log.info("Password changed successfully.");
     return ResponseEntity.accepted().build();
   }
 }
