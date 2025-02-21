@@ -2,6 +2,7 @@ package gr.georpavl.jwtAuth.api.domain.authentication;
 
 import gr.georpavl.jwtAuth.api.domain.authentication.dtos.AuthenticationRequest;
 import gr.georpavl.jwtAuth.api.domain.authentication.dtos.AuthenticationResponse;
+import gr.georpavl.jwtAuth.api.domain.authentication.dtos.ChangePasswordRequest;
 import gr.georpavl.jwtAuth.api.domain.authentication.dtos.RegistrationRequest;
 import gr.georpavl.jwtAuth.api.domain.users.Role;
 import gr.georpavl.jwtAuth.api.domain.users.controllers.UserFixture;
@@ -26,6 +27,14 @@ public class AuthenticationFixture {
   public static final String NEW_USER_PASSWORD = "Password1!";
   public static final String NEW_USER_CONFIRMATION_PASSWORD = "Password1!";
   public static final Role NEW_USER_ROLE = Role.USER;
+
+
+  public static final String CURRENT_PASSWORD = "CurrentPass1!";
+  public static final String NEW_PASSWORD = "NewPass1!";
+  public static final String INVALID_CURRENT_PASSWORD = "invalid";
+  public static final String WRONG_CURRENT_PASSWORD = "WrongPass1!";
+  public static final String CONFIRMATION_PASSWORD = "NewPass1!";
+  public static final String MISMATCHED_CONFIRMATION = "DifferentPass1!";
 
   public static AuthenticationRequest createAuthenticationRequest() {
     return AuthenticationRequest.of(USER1_USERNAME, USER1_PASSWORD);
@@ -96,5 +105,61 @@ public class AuthenticationFixture {
 
   public static AuthenticationResponse createAuthenticationResponse() {
     return AuthenticationResponse.of(UserFixture.createTestUserResponse(), "", "");
+  }
+
+  public static ChangePasswordRequest createValidChangePasswordRequest() {
+    return ChangePasswordRequest.of(
+        CURRENT_PASSWORD,
+        NEW_PASSWORD,
+        CONFIRMATION_PASSWORD);
+  }
+
+  public static ChangePasswordRequest createInvalidPasswordFormatRequest() {
+    return ChangePasswordRequest.of(
+        INVALID_CURRENT_PASSWORD,
+        NEW_PASSWORD,
+        NEW_PASSWORD);
+  }
+
+  public static ChangePasswordRequest createWrongCurrentPasswordRequest() {
+    return ChangePasswordRequest.of(
+        WRONG_CURRENT_PASSWORD,
+        NEW_PASSWORD,
+        NEW_PASSWORD);
+  }
+
+  public static ChangePasswordRequest createMismatchedConfirmationRequest() {
+    return ChangePasswordRequest.of(
+        CURRENT_PASSWORD,
+        NEW_PASSWORD,
+        MISMATCHED_CONFIRMATION);
+  }
+
+  public static ChangePasswordRequest createSamePasswordRequest() {
+    return ChangePasswordRequest.of(
+        CURRENT_PASSWORD,
+        CURRENT_PASSWORD,
+        CURRENT_PASSWORD);
+  }
+
+  public static ChangePasswordRequest createValidChangePasswordRequestUser1() {
+    return ChangePasswordRequest.of(
+        USER1_PASSWORD,
+        NEW_PASSWORD,
+        CONFIRMATION_PASSWORD);
+  }
+
+  public static ChangePasswordRequest createMismatchedConfirmationRequestUser1() {
+    return ChangePasswordRequest.of(
+        USER1_PASSWORD,
+        NEW_PASSWORD,
+        MISMATCHED_CONFIRMATION);
+  }
+
+  public static ChangePasswordRequest createSamePasswordRequestUser1() {
+    return ChangePasswordRequest.of(
+        USER1_PASSWORD,
+        USER1_PASSWORD,
+        USER1_PASSWORD);
   }
 }
